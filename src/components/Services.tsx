@@ -1,5 +1,5 @@
 
-import { ShoppingCart, FastDelivery, Utensils, Gift } from "lucide-react";
+import { ShoppingCart, Truck, Utensils, Gift } from "lucide-react";
 
 const Services = () => {
   const services = [
@@ -11,7 +11,7 @@ const Services = () => {
     {
       title: "Fast Delivery",
       description: "Get your food delivered to your door in 30 minutes or less",
-      icon: <FastDelivery className="text-foodie-primary" size={24} />
+      icon: <Truck className="text-foodie-primary" size={24} />
     },
     {
       title: "Catering",
