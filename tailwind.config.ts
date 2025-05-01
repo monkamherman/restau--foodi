@@ -63,12 +63,17 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				restaurant: {
-					'burgundy': '#6B0F1A',
-					'gold': '#C8A97E',
-					'dark': '#121212',
-					'light': '#F9F9F9',
-					'gray': '#888888'
+				// Nouvelles couleurs pour le site de restaurant
+				foodie: {
+					'primary': '#00BD56',
+					'primary-dark': '#00A348',
+					'primary-light': '#E3FFF0',
+					'secondary': '#F9F9F9',
+					'accent': '#FFE1B5',
+					'text': '#212121',
+					'text-light': '#757575',
+					'bg-light': '#FFFFFF',
+					'rating': '#FFC107',
 				}
 			},
 			borderRadius: {
@@ -78,34 +83,32 @@ export default {
 			},
 			keyframes: {
 				'accordion-down': {
-					from: {
-						height: '0'
-					},
-					to: {
-						height: 'var(--radix-accordion-content-height)'
-					}
+					from: { height: '0' },
+					to: { height: 'var(--radix-accordion-content-height)' }
 				},
 				'accordion-up': {
-					from: {
-						height: 'var(--radix-accordion-content-height)'
-					},
-					to: {
-						height: '0'
-					}
+					from: { height: 'var(--radix-accordion-content-height)' },
+					to: { height: '0' }
 				},
 				'fade-in': {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' }
-        }
+        },
+				'slide-in': {
+					'0%': { transform: 'translateX(-100%)' },
+					'100%': { transform: 'translateX(0)' }
+				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				'fade-in': 'fade-in 1.5s ease-out'
+				'fade-in': 'fade-in 1.5s ease-out',
+				'slide-in': 'slide-in 0.5s ease-out'
 			},
 			fontFamily: {
 				'playfair': ['Playfair Display', 'serif'],
-				'lato': ['Lato', 'sans-serif']
+				'lato': ['Lato', 'sans-serif'],
+				'poppins': ['Poppins', 'sans-serif']
 			}
 		}
 	},

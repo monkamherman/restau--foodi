@@ -1,9 +1,10 @@
 
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
-import About from "@/components/About";
-import Menu from "@/components/Menu";
-import Reservation from "@/components/Reservation";
+import Categories from "@/components/Categories";
+import FeaturedDishes from "@/components/FeaturedDishes";
+import Testimonials from "@/components/Testimonials";
+import Services from "@/components/Services";
 import Footer from "@/components/Footer";
 
 const Index = () => {
@@ -11,9 +12,10 @@ const Index = () => {
     <>
       <Header />
       <Hero />
-      <About />
-      <Menu />
-      <Reservation />
+      <Categories />
+      <FeaturedDishes />
+      <Testimonials />
+      <Services />
       <Footer />
     </>
   );

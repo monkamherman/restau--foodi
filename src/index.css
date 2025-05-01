@@ -5,6 +5,7 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 @layer base {
   :root {
@@ -36,7 +37,7 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
   }
 }
 
@@ -46,13 +47,15 @@
   }
 
   body {
-    @apply bg-restaurant-light font-lato text-restaurant-dark;
+    @apply bg-foodie-bg-light font-poppins text-foodie-text;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-playfair;
+    @apply font-poppins font-bold;
   }
+}
 
+@layer components {
   .container-custom {
     @apply container mx-auto px-4 md:px-6 lg:px-8 xl:px-16;
   }
@@ -61,15 +64,55 @@
     @apply py-16 md:py-24;
   }
   
-  .gold-underline {
-    @apply relative after:absolute after:bottom-[-10px] after:left-0 after:h-[2px] after:w-16 after:bg-restaurant-gold;
-  }
-  
   .btn-primary {
-    @apply bg-restaurant-burgundy text-white px-6 py-3 transition-all duration-300 hover:bg-opacity-90 inline-block;
+    @apply bg-foodie-primary text-white px-6 py-3 rounded-full transition-all duration-300 hover:bg-foodie-primary-dark inline-block font-medium;
   }
   
   .btn-outline {
-    @apply border border-restaurant-gold text-restaurant-gold px-6 py-3 transition-all duration-300 hover:bg-restaurant-gold hover:text-white inline-block;
+    @apply border border-foodie-primary text-foodie-primary px-6 py-3 rounded-full transition-all duration-300 hover:bg-foodie-primary hover:text-white inline-block font-medium;
+  }
+  
+  .category-card {
+    @apply bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center;
+  }
+  
+  .category-icon {
+    @apply w-16 h-16 rounded-full bg-foodie-primary-light flex items-center justify-center mb-3;
+  }
+  
+  .section-title {
+    @apply text-3xl font-bold mb-6;
+  }
+  
+  .section-subtitle {
+    @apply text-foodie-primary uppercase text-sm font-medium mb-2;
+  }
+  
+  .rating {
+    @apply flex items-center;
+  }
+  
+  .rating-star {
+    @apply text-foodie-rating;
+  }
+  
+  .dish-card {
+    @apply bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-all relative;
+  }
+  
+  .dish-badge {
+    @apply absolute top-4 right-4 bg-foodie-primary text-white text-xs py-1 px-2 rounded-lg;
+  }
+  
+  .testimonial-card {
+    @apply bg-white p-6 rounded-xl shadow-sm;
+  }
+  
+  .service-card {
+    @apply border border-gray-100 p-6 rounded-xl flex flex-col items-center text-center;
+  }
+  
+  .service-icon {
+    @apply w-12 h-12 rounded-full bg-foodie-primary-light flex items-center justify-center mb-4;
   }
 }
