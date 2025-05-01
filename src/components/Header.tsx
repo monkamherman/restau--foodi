@@ -2,10 +2,14 @@
 import { useState } from "react";
 import { Menu, X, Search, ShoppingCart, User } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
+  
+  // Sample cart count (in a real app, this would come from context/state)
+  const cartItemCount = 3;
 
   const menuItems = [
     { name: "Home", path: "/" },
@@ -29,7 +33,12 @@ const Header = () => {
               <li key={item.name}>
                 <Link 
                   to={item.path}
-                  className="font-medium text-foodie-text hover:text-foodie-primary transition-colors"
+                  className={cn(
+                    "font-medium transition-colors",
+                    location.pathname === item.path 
+                      ? "text-foodie-primary" 
+                      : "text-foodie-text hover:text-foodie-primary"
+                  )}
                 >
                   {item.name}
                 </Link>
@@ -46,9 +55,17 @@ const Header = () => {
           <button className="text-foodie-text hover:text-foodie-primary transition-colors">
             <User size={20} />
           </button>
-          <button className="text-foodie-text hover:text-foodie-primary transition-colors md:border-l md:pl-4 md:border-gray-200">
+          <Link 
+            to="/cart" 
+            className="text-foodie-text hover:text-foodie-primary transition-colors md:border-l md:pl-4 md:border-gray-200 relative"
+          >
             <ShoppingCart size={20} />
-          </button>
+            {cartItemCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-foodie-primary text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                {cartItemCount}
+              </span>
+            )}
+          </Link>
           <Link to="/menu" className="hidden md:block btn-primary py-2">Order Online</Link>
           
           {/* Mobile Menu Button */}
@@ -70,13 +87,24 @@ const Header = () => {
               <li key={item.name}>
                 <Link 
                   to={item.path}
-                  className="text-foodie-text hover:text-foodie-primary font-medium text-xl"
+                  className={cn(
+                    "font-medium text-xl",
+                    location.pathname === item.path
+                      ? "text-foodie-primary" 
+                      : "text-foodie-text hover:text-foodie-primary"
+                  )}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.name}
                 </Link>
               </li>
             ))}
+            <li>
+              <Link to="/cart" className="flex items-center text-xl" onClick={() => setIsMenuOpen(false)}>
+                <ShoppingCart className="mr-2" />
+                Cart {cartItemCount > 0 && <span className="ml-2 bg-foodie-primary text-white text-xs px-2 py-1 rounded-full">{cartItemCount}</span>}
+              </Link>
+            </li>
             <li>
               <Link to="/menu" className="btn-primary mt-4" onClick={() => setIsMenuOpen(false)}>
                 Order Online

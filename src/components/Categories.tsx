@@ -1,23 +1,48 @@
 
-import { Salad, Pizza, Cake, Sandwich } from "lucide-react";
+import { Salad, Pizza, Cake, Sandwich, Coffee, Wine, Beef, Fish } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Categories = () => {
   const categories = [
     {
       name: "Main Dish",
-      icon: <Pizza className="text-foodie-primary" size={28} />
+      icon: <Pizza className="text-foodie-primary" size={28} />,
+      slug: "main-dish"
     },
     {
       name: "Break Fast",
-      icon: <Sandwich className="text-foodie-primary" size={28} />
+      icon: <Sandwich className="text-foodie-primary" size={28} />,
+      slug: "breakfast"
     },
     {
       name: "Dessert",
-      icon: <Cake className="text-foodie-primary" size={28} />
+      icon: <Cake className="text-foodie-primary" size={28} />,
+      slug: "dessert"
     },
     {
-      name: "Browse All",
-      icon: <Salad className="text-foodie-primary" size={28} />
+      name: "Salads",
+      icon: <Salad className="text-foodie-primary" size={28} />,
+      slug: "salads"
+    },
+    {
+      name: "Beverages",
+      icon: <Coffee className="text-foodie-primary" size={28} />,
+      slug: "beverages"
+    },
+    {
+      name: "Wine & Spirits",
+      icon: <Wine className="text-foodie-primary" size={28} />,
+      slug: "wine"
+    },
+    {
+      name: "Steaks",
+      icon: <Beef className="text-foodie-primary" size={28} />,
+      slug: "steaks"
+    },
+    {
+      name: "Seafood",
+      icon: <Fish className="text-foodie-primary" size={28} />,
+      slug: "seafood"
     }
   ];
 
@@ -26,14 +51,18 @@ const Categories = () => {
       <div className="container-custom">
         <h2 className="text-center section-title mb-12">Popular Categories</h2>
         
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-4 md:gap-6">
           {categories.map((category) => (
-            <div key={category.name} className="category-card">
+            <Link
+              to={`/menu?category=${category.slug}`}
+              key={category.name}
+              className="category-card hover:border-foodie-primary hover:shadow-md transition-all"
+            >
               <div className="category-icon">
                 {category.icon}
               </div>
-              <h3 className="font-medium">{category.name}</h3>
-            </div>
+              <h3 className="font-medium text-sm md:text-base">{category.name}</h3>
+            </Link>
           ))}
         </div>
       </div>
