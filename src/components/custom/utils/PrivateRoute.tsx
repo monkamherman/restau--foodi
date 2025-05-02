@@ -1,6 +1,5 @@
-
 import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/auth";
 
 type PrivateRouteProps = {
   children: React.ReactNode;

@@ -1,4 +1,3 @@
-
 import { createBrowserRouter, Outlet } from 'react-router-dom'
 import Navbar from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -6,7 +5,7 @@ import ScrollToTop from '@/components/custom/utils/ScrollToTop'
 import authRoutes from './routes-config/authRoutes'
 import PrivateRoute from '@/components/custom/utils/PrivateRoute'
 import DynamicPageLoader from '@/components/custom/utils/LazyComponent'
-import { AuthProvider } from '@/hooks/use-auth'
+import { AuthProvider } from '@/hooks/auth'
 
 const Router = createBrowserRouter([
 	{
