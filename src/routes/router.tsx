@@ -4,17 +4,19 @@ import Navbar from '@/components/Header'
 import Footer from '@/components/Footer'
 import ScrollToTop from '@/components/custom/utils/ScrollToTop'
 import authRoutes from './routes-config/authRoutes'
+import PrivateRoute from '@/components/custom/utils/PrivateRoute'
 import DynamicPageLoader from '@/components/custom/utils/LazyComponent'
+import { AuthProvider } from '@/hooks/use-auth'
 
 const Router = createBrowserRouter([
 	{
 		path: '',
 		element: (
-			<>
+			<AuthProvider>
 				<Outlet />
 				{/* To scroll to top each time that we change routes */}
 				<ScrollToTop />
-			</>
+			</AuthProvider>
 		),
 
 		// Page erreur
@@ -59,9 +61,91 @@ const Router = createBrowserRouter([
 						path: '/dish/:id',
 						element: <DynamicPageLoader pageKey="dishDetail/DishDetail" />
 					},
-					// Authentication routes part
+					{
+						path: '/account',
+						element: (
+							<PrivateRoute>
+								<DynamicPageLoader pageKey="account/UserAccount" />
+							</PrivateRoute>
+						)
+					},
+					// Authentication routes
 					authRoutes,
 				]
+			},
+			// Admin routes
+			{
+				path: '/admin',
+				element: (
+					<PrivateRoute requireAdmin={true}>
+						<DynamicPageLoader pageKey="admin/Dashboard" />
+					</PrivateRoute>
+				)
+			},
+			{
+				path: '/admin/dishes',
+				element: (
+					<PrivateRoute requireAdmin={true}>
+						<DynamicPageLoader pageKey="admin/dishes/DishesManagement" />
+					</PrivateRoute>
+				)
+			},
+			{
+				path: '/admin/dishes/new',
+				element: (
+					<PrivateRoute requireAdmin={true}>
+						<DynamicPageLoader pageKey="admin/dishes/DishForm" />
+					</PrivateRoute>
+				)
+			},
+			{
+				path: '/admin/dishes/:id',
+				element: (
+					<PrivateRoute requireAdmin={true}>
+						<DynamicPageLoader pageKey="admin/dishes/DishForm" />
+					</PrivateRoute>
+				)
+			},
+			// Additional admin routes to be implemented
+			{
+				path: '/admin/promotions',
+				element: (
+					<PrivateRoute requireAdmin={true}>
+						<DynamicPageLoader pageKey="admin/promotions/PromotionsManagement" />
+					</PrivateRoute>
+				)
+			},
+			{
+				path: '/admin/coupons',
+				element: (
+					<PrivateRoute requireAdmin={true}>
+						<DynamicPageLoader pageKey="admin/coupons/CouponsManagement" />
+					</PrivateRoute>
+				)
+			},
+			{
+				path: '/admin/orders',
+				element: (
+					<PrivateRoute requireAdmin={true}>
+						<DynamicPageLoader pageKey="admin/orders/OrdersManagement" />
+					</PrivateRoute>
+				)
+			},
+			{
+				path: '/admin/reviews',
+				element: (
+					<PrivateRoute requireAdmin={true}>
+						<DynamicPageLoader pageKey="admin/reviews/ReviewsManagement" />
+					</PrivateRoute>
+				)
+			},
+			{
+				path: '/admin/users',
+				element: (
+					<PrivateRoute requireAdmin={true}>
+						<DynamicPageLoader pageKey="admin/users/UsersManagement" />
+					</PrivateRoute>
+				)
 			},
 		],
 	},
