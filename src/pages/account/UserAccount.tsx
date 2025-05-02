@@ -69,7 +69,7 @@ const UserAccount = () => {
         .update({
           first_name: profile.first_name,
           last_name: profile.last_name,
-          updated_at: new Date()
+          updated_at: new Date().toISOString()
         })
         .eq('id', user?.id);
 

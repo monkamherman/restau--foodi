@@ -1,70 +1,79 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Heart, Minus, Plus, Star, Clock, ShoppingCart } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const dishes = [
-  {
-    id: "1",
-    name: "Fettucini Salad",
-    description: "A delicious pasta salad made with fresh fettucini, cherry tomatoes, olives, feta cheese, and a zesty lemon herb dressing. Perfect as a side dish or light main course.",
-    image: "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-    price: 24.00,
-    rating: 4.9,
-    reviews: 86,
-    category: "Pasta",
-    prepTime: "25 min",
-    calories: 420,
-    tags: ["Vegetarian", "Italian", "Pasta"],
-    ingredients: [
-      "Fresh fettucini pasta", "Cherry tomatoes", "Kalamata olives", "Feta cheese", "Red onion", 
-      "Fresh basil", "Extra virgin olive oil", "Lemon juice", "Garlic", "Salt and pepper"
-    ]
-  },
-  {
-    id: "2",
-    name: "Vegetable Salad",
-    description: "A colorful and nutritious vegetable salad packed with fresh produce, seeds, and a honey-mustard vinaigrette. This salad is not only beautiful but also full of vitamins and antioxidants.",
-    image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-    price: 20.00,
-    rating: 4.8,
-    reviews: 47,
-    category: "Salads",
-    prepTime: "15 min",
-    calories: 320,
-    tags: ["Vegetarian", "Vegan", "Gluten-Free"],
-    ingredients: [
-      "Mixed greens", "Bell peppers", "Cucumber", "Cherry tomatoes", "Avocado", 
-      "Pumpkin seeds", "Sunflower seeds", "Red onion", "Honey", "Dijon mustard", "Apple cider vinegar"
-    ]
-  },
-  {
-    id: "3",
-    name: "Egg Fried Rice",
-    description: "A classic Asian comfort food made with fluffy rice, scrambled eggs, vegetables, and savory soy sauce. This quick and satisfying dish is perfect for lunch or dinner.",
-    image: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-    price: 22.00,
-    rating: 4.9,
-    reviews: 53,
-    category: "Asian",
-    prepTime: "20 min",
-    calories: 480,
-    tags: ["Asian", "Rice", "Quick Meal"],
-    ingredients: [
-      "Jasmine rice", "Eggs", "Carrots", "Peas", "Green onions", 
-      "Soy sauce", "Sesame oil", "Garlic", "Ginger", "Vegetable oil"
-    ]
-  }
-];
+import { useToast } from "@/hooks/use-toast";
+import ReviewsList from "@/components/ReviewsList";
+import ReviewForm from "@/components/ReviewForm";
 
 const DishDetail = () => {
   const { id } = useParams();
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("description");
+  const [dish, setDish] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [refreshReviews, setRefreshReviews] = useState(0);
+  const { toast } = useToast();
   
-  // Find the dish by id
-  const dish = dishes.find(dish => dish.id === id);
+  useEffect(() => {
+    if (id) {
+      fetchDish(id);
+    }
+  }, [id]);
+  
+  const fetchDish = async (dishId: string) => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('dishes')
+        .select('*')
+        .eq('id', dishId)
+        .single();
+      
+      if (error) throw error;
+      
+      setDish(data);
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error loading dish",
+        description: error.message
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const updateQuantity = (change: number) => {
+    setQuantity(Math.max(1, quantity + change));
+  };
+  
+  const addToCart = () => {
+    console.log(`Added ${quantity} of ${dish.name} to cart`);
+    toast({
+      title: "Added to cart",
+      description: `${quantity} × ${dish.name} added to your cart`
+    });
+  };
+
+  const handleReviewSuccess = () => {
+    setRefreshReviews(prev => prev + 1);
+  };
+
+  const tabItems = [
+    { id: "description", label: "Description" },
+    { id: "reviews", label: "Reviews" }
+  ];
+
+  if (isLoading) {
+    return (
+      <div className="pt-32 pb-16 flex justify-center">
+        <div className="animate-spin h-10 w-10 border-4 border-foodie-primary border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
   
   if (!dish) {
     return (
@@ -75,21 +84,6 @@ const DishDetail = () => {
     );
   }
   
-  const updateQuantity = (change) => {
-    setQuantity(Math.max(1, quantity + change));
-  };
-  
-  const addToCart = () => {
-    console.log(`Added ${quantity} of ${dish.name} to cart`);
-    // In a real app, this would dispatch to a cart context or state manager
-  };
-
-  const tabItems = [
-    { id: "description", label: "Description" },
-    { id: "ingredients", label: "Ingredients" },
-    { id: "reviews", label: `Reviews (${dish.reviews})` }
-  ];
-
   return (
     <div className="pt-32 pb-16">
       <div className="container-custom">
@@ -97,7 +91,7 @@ const DishDetail = () => {
           {/* Image section */}
           <div className="rounded-lg overflow-hidden">
             <img 
-              src={dish.image} 
+              src={dish.image_url || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80"} 
               alt={dish.name} 
               className="w-full h-[400px] object-cover"
             />
@@ -117,36 +111,13 @@ const DishDetail = () => {
             <h1 className="text-3xl font-bold mb-3">{dish.name}</h1>
             
             <div className="flex items-center mb-6">
-              <div className="flex items-center text-foodie-rating">
-                <Star size={18} fill="#FFC107" />
-                <span className="ml-1 font-medium">{dish.rating}</span>
-              </div>
-              <span className="text-foodie-text-light text-sm mx-2">
-                ({dish.reviews} reviews)
-              </span>
-              <div className="flex items-center ml-4">
-                <Clock size={18} className="text-foodie-text-light" />
-                <span className="ml-1 text-foodie-text-light">{dish.prepTime}</span>
-              </div>
-              <div className="flex items-center ml-4">
-                <span className="text-foodie-text-light">{dish.calories} cal</span>
-              </div>
-            </div>
-            
-            <div className="flex flex-wrap gap-2 mb-6">
-              {dish.tags.map((tag, index) => (
-                <span 
-                  key={index} 
-                  className="bg-gray-100 text-foodie-text-light text-xs px-2 py-1 rounded"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-            
-            <div className="flex items-center mb-8">
+              {/* Price will be here */}
               <span className="text-2xl font-bold text-foodie-primary">${dish.price.toFixed(2)}</span>
             </div>
+            
+            {dish.description && (
+              <p className="text-foodie-text-light mb-6">{dish.description}</p>
+            )}
             
             <div className="flex items-center space-x-4 mb-8">
               <div className="flex items-center border border-gray-300 rounded-lg">
@@ -196,20 +167,13 @@ const DishDetail = () => {
             
             <div className="py-6">
               {activeTab === "description" && (
-                <p className="text-foodie-text-light">{dish.description}</p>
-              )}
-              
-              {activeTab === "ingredients" && (
-                <ul className="list-disc pl-5 space-y-2 text-foodie-text-light">
-                  {dish.ingredients.map((ingredient, index) => (
-                    <li key={index}>{ingredient}</li>
-                  ))}
-                </ul>
+                <p className="text-foodie-text-light">{dish.description || "No description available for this dish."}</p>
               )}
               
               {activeTab === "reviews" && (
-                <div className="text-foodie-text-light">
-                  <p>Customer reviews will appear here.</p>
+                <div className="space-y-8">
+                  <ReviewsList dishId={dish.id} refreshTrigger={refreshReviews} />
+                  <ReviewForm dishId={dish.id} onSuccess={handleReviewSuccess} />
                 </div>
               )}
             </div>

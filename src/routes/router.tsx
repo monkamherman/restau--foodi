@@ -69,6 +69,14 @@ const Router = createBrowserRouter([
 							</PrivateRoute>
 						)
 					},
+					{
+						path: '/profile',
+						element: (
+							<PrivateRoute>
+								<DynamicPageLoader pageKey="profile/Profile" />
+							</PrivateRoute>
+						)
+					},
 					// Authentication routes
 					authRoutes,
 				]
