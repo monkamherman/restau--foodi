@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { User, Session } from '@supabase/supabase-js';
+import { User, Session, AuthError } from '@supabase/supabase-js';
 import { useToast } from "@/hooks/use-toast";
 import { AuthContext } from "./auth-context";
 import { Role } from "./types";
@@ -41,6 +41,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
+        console.log("Auth state change event:", event);
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
         
@@ -59,6 +60,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Then check for existing session
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      console.log("Initial session check:", currentSession ? "Session found" : "No session");
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
       
@@ -79,7 +81,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       
-      if (error) throw error;
+      if (error) {
+        console.error("Auth error:", error);
+        throw error;
+      }
       
       if (data.user) {
         toast({
@@ -88,19 +93,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         });
         navigate('/');
       }
+      
+      return data;
     } catch (error: any) {
       console.error("Auth error:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur d'authentification",
-        description: error.message || "Échec de la connexion",
-      });
+      throw error;
     }
   };
 
   // Sign up with email and password
   const signUp = async (email: string, password: string, firstName?: string, lastName?: string) => {
     try {
+      // Option pour les tests: utiliser la connexion automatique
       const { data, error } = await supabase.auth.signUp({ 
         email, 
         password,
@@ -108,15 +112,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           data: {
             first_name: firstName || '',
             last_name: lastName || ''
-          }
+          },
+          emailRedirectTo: `${window.location.origin}/login`
         }
       });
       
       if (error) throw error;
-      
-      // Update profile info if the signup was successful
+
+      // Si l'inscription est réussie et que l'utilisateur est créé
       if (data.user) {
-        // Check if the profile exists, if not, it should be created by the database trigger
+        // Mettre à jour les informations du profil
         const { error: profileError } = await supabase
           .from('profiles')
           .update({
@@ -128,12 +133,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (profileError) {
           console.error("Error updating profile:", profileError);
         }
-        
-        toast({
-          title: "Compte créé",
-          description: "Veuillez vérifier votre email pour les instructions de vérification",
-        });
       }
+
+      // Automatiquement connecter l'utilisateur pour les tests
+      // (uniquement si autoSignIn est vrai et que la session est définie)
+      if (data.session) {
+        setUser(data.user);
+        setSession(data.session);
+        
+        if (data.user) {
+          fetchUserRoles(data.user.id);
+        }
+      }
+      
+      return data;
     } catch (error: any) {
       console.error("Registration error:", error);
       throw error;
@@ -160,7 +173,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Request password reset
   const forgotPassword = async (email: string) => {
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/change-password`,
+      });
       if (error) throw error;
       toast({
         title: "Lien de réinitialisation envoyé",

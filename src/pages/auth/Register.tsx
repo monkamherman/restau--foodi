@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const Register = () => {
   const [email, setEmail] = useState("");
@@ -14,6 +15,7 @@ const Register = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [autoSignIn, setAutoSignIn] = useState(true);
   const { signUp } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -32,12 +34,28 @@ const Register = () => {
     
     setIsLoading(true);
     try {
-      await signUp(email, password, firstName, lastName);
-      toast({
-        title: "Compte créé",
-        description: "Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.",
-      });
-      navigate('/login');
+      const response = await signUp(email, password, firstName, lastName);
+      
+      if (response.user) {
+        toast({
+          title: "Compte créé",
+          description: autoSignIn 
+            ? "Votre compte a été créé avec succès. Vous êtes maintenant connecté." 
+            : "Votre compte a été créé avec succès. Veuillez vérifier votre email pour confirmer votre compte.",
+        });
+        
+        if (autoSignIn) {
+          navigate('/');
+        } else {
+          navigate('/login');
+        }
+      } else {
+        toast({
+          title: "Compte créé",
+          description: "Veuillez vérifier votre email pour confirmer votre compte.",
+        });
+        navigate('/login');
+      }
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -104,6 +122,16 @@ const Register = () => {
               <p className="text-xs text-muted-foreground">
                 Le mot de passe doit contenir au moins 6 caractères.
               </p>
+            </div>
+            <div className="flex items-center space-x-2 my-4">
+              <Checkbox
+                id="auto-signin"
+                checked={autoSignIn}
+                onCheckedChange={(checked) => setAutoSignIn(checked === true)}
+              />
+              <Label htmlFor="auto-signin">
+                Connectez-moi automatiquement (pour test uniquement)
+              </Label>
             </div>
             <Button
               type="submit"
