@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/auth";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { User as UserIcon, Settings, Edit, Star } from "lucide-react";
+import { User as UserIcon, Settings, Edit, Star, Shield } from "lucide-react";
 import ReviewList from "./components/ReviewList";
 
 const Profile = () => {
@@ -49,7 +50,7 @@ const Profile = () => {
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Error loading profile",
+        title: "Erreur lors du chargement du profil",
         description: error.message
       });
     } finally {
@@ -78,15 +79,15 @@ const Profile = () => {
       if (error) throw error;
       
       toast({
-        title: "Profile updated",
-        description: "Your profile has been successfully updated"
+        title: "Profil mis à jour",
+        description: "Votre profil a été mis à jour avec succès"
       });
       
       setIsEditing(false);
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Error updating profile",
+        title: "Erreur lors de la mise à jour du profil",
         description: error.message
       });
     } finally {
@@ -97,7 +98,7 @@ const Profile = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin h-10 w-10 border-4 border-foodie-primary border-t-transparent rounded-full"></div>
+        <div className="animate-spin h-10 w-10 border-4 border-primary border-t-transparent rounded-full"></div>
       </div>
     );
   }
@@ -105,17 +106,33 @@ const Profile = () => {
   return (
     <div className="container mx-auto py-12 px-4">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">My Profile</h1>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold">Mon Profil</h1>
+          <div className="flex gap-2">
+            <Button variant="outline" asChild>
+              <Link to="/profile/settings">
+                <Settings className="mr-2 h-4 w-4" />
+                Paramètres
+              </Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/profile/security">
+                <Shield className="mr-2 h-4 w-4" />
+                Sécurité
+              </Link>
+            </Button>
+          </div>
+        </div>
         
         <Tabs defaultValue="profile" className="space-y-6">
           <TabsList>
             <TabsTrigger value="profile" className="flex items-center gap-2">
               <UserIcon size={18} />
-              <span>Profile</span>
+              <span>Profil</span>
             </TabsTrigger>
             <TabsTrigger value="reviews" className="flex items-center gap-2">
               <Star size={18} />
-              <span>My Reviews</span>
+              <span>Mes Avis</span>
             </TabsTrigger>
           </TabsList>
           
@@ -123,8 +140,8 @@ const Profile = () => {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle>Personal Information</CardTitle>
-                  <CardDescription>Update your profile details</CardDescription>
+                  <CardTitle>Informations personnelles</CardTitle>
+                  <CardDescription>Mettez à jour les détails de votre profil</CardDescription>
                 </div>
                 {!isEditing ? (
                   <Button 
@@ -134,7 +151,7 @@ const Profile = () => {
                     onClick={() => setIsEditing(true)}
                   >
                     <Edit size={16} />
-                    <span>Edit Profile</span>
+                    <span>Modifier le profil</span>
                   </Button>
                 ) : (
                   <div className="flex items-center gap-2">
@@ -147,14 +164,14 @@ const Profile = () => {
                       }}
                       disabled={isSaving}
                     >
-                      Cancel
+                      Annuler
                     </Button>
                     <Button 
                       size="sm"
                       onClick={saveProfile}
                       disabled={isSaving}
                     >
-                      {isSaving ? "Saving..." : "Save Changes"}
+                      {isSaving ? "Enregistrement..." : "Enregistrer"}
                     </Button>
                   </div>
                 )}
@@ -176,7 +193,7 @@ const Profile = () => {
                   <div className="flex-1 space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="first_name">First Name</Label>
+                        <Label htmlFor="first_name">Prénom</Label>
                         <Input
                           id="first_name"
                           name="first_name"
@@ -186,7 +203,7 @@ const Profile = () => {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="last_name">Last Name</Label>
+                        <Label htmlFor="last_name">Nom</Label>
                         <Input
                           id="last_name"
                           name="last_name"
@@ -205,7 +222,7 @@ const Profile = () => {
                         disabled
                         className="bg-muted/50"
                       />
-                      <p className="text-xs text-muted-foreground">Email cannot be changed</p>
+                      <p className="text-xs text-muted-foreground">L'email ne peut pas être modifié</p>
                     </div>
                   </div>
                 </div>

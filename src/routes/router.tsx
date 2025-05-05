@@ -3,6 +3,7 @@ import Navbar from '@/components/Header'
 import Footer from '@/components/Footer'
 import ScrollToTop from '@/components/custom/utils/ScrollToTop'
 import authRoutes from './routes-config/authRoutes'
+import profileRoutes from './routes-config/profileRoutes'
 import PrivateRoute from '@/components/custom/utils/PrivateRoute'
 import DynamicPageLoader from '@/components/custom/utils/LazyComponent'
 import { AuthProvider } from '@/hooks/auth'
@@ -68,14 +69,8 @@ const Router = createBrowserRouter([
 							</PrivateRoute>
 						)
 					},
-					{
-						path: '/profile',
-						element: (
-							<PrivateRoute>
-								<DynamicPageLoader pageKey="profile/Profile" />
-							</PrivateRoute>
-						)
-					},
+					// Profile routes
+					profileRoutes,
 					// Authentication routes
 					authRoutes,
 				]

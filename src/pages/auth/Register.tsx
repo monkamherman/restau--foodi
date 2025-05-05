@@ -44,7 +44,7 @@ const Register = () => {
             : "Votre compte a été créé avec succès. Veuillez vérifier votre email pour confirmer votre compte.",
         });
         
-        if (autoSignIn) {
+        if (autoSignIn && response.session) {
           navigate('/');
         } else {
           navigate('/login');
