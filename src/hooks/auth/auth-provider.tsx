@@ -77,14 +77,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Sign in with email and password
   const signIn = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      
       if (error) throw error;
-      navigate('/');
+      
+      if (data.user) {
+        toast({
+          title: "Connexion réussie",
+          description: "Vous êtes maintenant connecté",
+        });
+        navigate('/');
+      }
     } catch (error: any) {
+      console.error("Auth error:", error);
       toast({
         variant: "destructive",
-        title: "Authentication error",
-        description: error.message || "Failed to sign in",
+        title: "Erreur d'authentification",
+        description: error.message || "Échec de la connexion",
       });
     }
   };
@@ -92,30 +101,42 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Sign up with email and password
   const signUp = async (email: string, password: string, firstName?: string, lastName?: string) => {
     try {
-      const { error } = await supabase.auth.signUp({ 
+      const { data, error } = await supabase.auth.signUp({ 
         email, 
         password,
         options: {
           data: {
-            first_name: firstName,
-            last_name: lastName
+            first_name: firstName || '',
+            last_name: lastName || ''
           }
         }
       });
       
       if (error) throw error;
       
-      toast({
-        title: "Account created",
-        description: "Please check your email for verification instructions",
-      });
-      navigate('/login');
+      // Update profile info if the signup was successful
+      if (data.user) {
+        // Check if the profile exists, if not, it should be created by the database trigger
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({
+            first_name: firstName || null,
+            last_name: lastName || null
+          })
+          .eq('id', data.user.id);
+        
+        if (profileError) {
+          console.error("Error updating profile:", profileError);
+        }
+        
+        toast({
+          title: "Compte créé",
+          description: "Veuillez vérifier votre email pour les instructions de vérification",
+        });
+      }
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Registration error",
-        description: error.message || "Failed to create account",
-      });
+      console.error("Registration error:", error);
+      throw error;
     }
   };
 
@@ -123,12 +144,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
+      setUser(null);
+      setSession(null);
+      setUserRoles([]);
       navigate('/login');
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Error signing out",
-        description: error.message || "Failed to sign out",
+        title: "Erreur de déconnexion",
+        description: error.message || "Échec de la déconnexion",
       });
     }
   };
@@ -139,14 +163,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const { error } = await supabase.auth.resetPasswordForEmail(email);
       if (error) throw error;
       toast({
-        title: "Reset link sent",
-        description: "Check your email for password reset instructions",
+        title: "Lien de réinitialisation envoyé",
+        description: "Vérifiez votre email pour les instructions de réinitialisation du mot de passe",
       });
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: error.message || "Failed to send reset link",
+        title: "Erreur",
+        description: error.message || "Échec de l'envoi du lien de réinitialisation",
       });
     }
   };
@@ -157,15 +181,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
       toast({
-        title: "Password updated",
-        description: "Your password has been successfully reset",
+        title: "Mot de passe mis à jour",
+        description: "Votre mot de passe a été réinitialisé avec succès",
       });
       navigate('/login');
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: error.message || "Failed to reset password",
+        title: "Erreur",
+        description: error.message || "Échec de la réinitialisation du mot de passe",
       });
     }
   };
