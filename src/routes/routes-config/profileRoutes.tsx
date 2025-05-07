@@ -1,6 +1,7 @@
 
 import { Outlet } from "react-router-dom";
 import DynamicPageLoader from "@/components/custom/utils/LazyComponent";
+import PrivateRoute from "@/components/custom/utils/PrivateRoute";
 
 const profileRoutes = {
   path: '',
@@ -8,15 +9,27 @@ const profileRoutes = {
   children: [
     {
       path: '/profile',
-      element: <DynamicPageLoader pageKey="profile/Profile" />,
+      element: (
+        <PrivateRoute>
+          <DynamicPageLoader pageKey="profile/Profile" />
+        </PrivateRoute>
+      ),
     },
     {
       path: '/profile/settings',
-      element: <DynamicPageLoader pageKey="profile/UserProfile" />,
+      element: (
+        <PrivateRoute>
+          <DynamicPageLoader pageKey="profile/UserProfile" />
+        </PrivateRoute>
+      ),
     },
     {
       path: '/profile/security',
-      element: <DynamicPageLoader pageKey="profile/components/SecuritySettings" />,
+      element: (
+        <PrivateRoute>
+          <DynamicPageLoader pageKey="profile/components/SecuritySettings" />
+        </PrivateRoute>
+      ),
     }
   ]
 };

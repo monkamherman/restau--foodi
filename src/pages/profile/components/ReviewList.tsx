@@ -1,145 +1,159 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/hooks/auth";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Star, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Star } from "lucide-react";
 
-interface Review {
+type Review = {
   id: string;
-  dish_id: string;
   rating: number;
-  comment: string | null;
+  comment: string;
   created_at: string;
-  dish: {
-    name: string;
-    image_url: string | null;
-  };
-}
-
-interface ReviewListProps {
-  userId?: string;
-}
-
-const StarRating = ({ rating }: { rating: number }) => {
-  return (
-    <div className="flex items-center">
-      {[...Array(5)].map((_, i) => (
-        <Star
-          key={i}
-          size={16}
-          className={i < rating ? "text-yellow-500 fill-yellow-500" : "text-gray-300"}
-        />
-      ))}
-    </div>
-  );
+  dish_id: string;
+  dish_name?: string;
 };
 
-const ReviewList = ({ userId }: ReviewListProps) => {
+const ReviewList = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { toast } = useToast();
+  const [dishes, setDishes] = useState<Record<string, { name: string; image_url: string | null }>>({});
 
   useEffect(() => {
-    if (userId) {
+    if (user) {
       fetchUserReviews();
     }
-  }, [userId]);
+  }, [user]);
 
   const fetchUserReviews = async () => {
     try {
       setIsLoading(true);
-      const { data, error } = await supabase
-        .from('reviews')
-        .select(`
-          *,
-          dish:dish_id (
-            name,
-            image_url
-          )
-        `)
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
       
-      setReviews(data || []);
+      // Fetch user's reviews
+      const { data: reviewsData, error: reviewsError } = await supabase
+        .from("reviews")
+        .select("*")
+        .eq("user_id", user?.id);
+        
+      if (reviewsError) throw reviewsError;
+      
+      // Fetch all dishes to get their names
+      const { data: dishesData, error: dishesError } = await supabase
+        .from("dishes")
+        .select("id, name, image_url");
+        
+      if (dishesError) throw dishesError;
+      
+      // Create a lookup object for dishes
+      const dishesLookup: Record<string, { name: string; image_url: string | null }> = {};
+      dishesData.forEach((dish) => {
+        dishesLookup[dish.id] = { name: dish.name, image_url: dish.image_url };
+      });
+      
+      setDishes(dishesLookup);
+      setReviews(reviewsData);
+      
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Error loading reviews",
+        title: "Erreur lors du chargement des avis",
         description: error.message
       });
     } finally {
       setIsLoading(false);
     }
   };
-
+  
+  const handleDeleteReview = async (reviewId: string) => {
+    try {
+      const { error } = await supabase
+        .from("reviews")
+        .delete()
+        .eq("id", reviewId);
+        
+      if (error) throw error;
+      
+      // Remove the deleted review from state
+      setReviews(reviews.filter(review => review.id !== reviewId));
+      
+      toast({
+        title: "Avis supprimé",
+        description: "Votre avis a été supprimé avec succès"
+      });
+      
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erreur lors de la suppression",
+        description: error.message
+      });
+    }
+  };
+  
+  const renderStars = (rating: number) => {
+    return Array(5).fill(0).map((_, index) => (
+      <Star 
+        key={index} 
+        size={16} 
+        className={index < rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"} 
+      />
+    ));
+  };
+  
   if (isLoading) {
     return (
       <div className="flex justify-center py-8">
-        <div className="animate-spin h-8 w-8 border-4 border-foodie-primary border-t-transparent rounded-full"></div>
+        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
       </div>
-    );
-  }
-
-  if (reviews.length === 0) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>My Reviews</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <Star size={48} className="mb-4 opacity-20" />
-            <p className="text-lg font-medium mb-2">No reviews yet</p>
-            <p className="text-muted-foreground">You haven't left any reviews on dishes yet.</p>
-          </div>
-        </CardContent>
-      </Card>
     );
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>My Reviews</CardTitle>
+        <CardTitle>Mes avis</CardTitle>
+        <CardDescription>Les avis que vous avez laissés sur nos plats</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-6">
-          {reviews.map((review) => (
-            <div key={review.id} className="border-b pb-6 last:border-b-0">
-              <div className="flex items-start gap-4">
-                <div className="w-16 h-16 rounded-md bg-gray-100 overflow-hidden">
-                  {review.dish?.image_url ? (
-                    <img 
-                      src={review.dish.image_url} 
-                      alt={review.dish?.name || "Dish"}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-muted">
-                      <Star size={24} className="opacity-20" />
+        {reviews.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">Vous n'avez pas encore laissé d'avis</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {reviews.map((review) => (
+              <div key={review.id} className="p-4 border rounded-lg">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-medium">
+                      {dishes[review.dish_id]?.name || "Plat inconnu"}
+                    </h3>
+                    <div className="flex mt-1 mb-2">
+                      {renderStars(review.rating)}
                     </div>
-                  )}
-                </div>
-                
-                <div className="flex-1">
-                  <h3 className="font-medium">{review.dish?.name || "Unknown dish"}</h3>
-                  <div className="flex items-center gap-2 mt-1">
-                    <StarRating rating={review.rating} />
-                    <span className="text-sm text-muted-foreground">
+                    <p className="text-sm">{review.comment}</p>
+                    <p className="text-xs text-muted-foreground mt-2">
                       {new Date(review.created_at).toLocaleDateString()}
-                    </span>
+                    </p>
                   </div>
-                  {review.comment && (
-                    <p className="mt-2 text-muted-foreground">{review.comment}</p>
-                  )}
+                  
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleDeleteReview(review.id)}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    <Trash2 size={16} />
+                  </Button>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

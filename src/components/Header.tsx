@@ -3,10 +3,21 @@ import { useState } from "react";
 import { Menu, X, Search, ShoppingCart, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "@/hooks/auth";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const { user, signOut } = useAuth();
   
   // Sample cart count (in a real app, this would come from context/state)
   const cartItemCount = 3;
@@ -53,9 +64,38 @@ const Header = () => {
           <button className="text-foodie-text hover:text-foodie-primary transition-colors">
             <Search size={20} />
           </button>
-          <button className="text-foodie-text hover:text-foodie-primary transition-colors">
-            <User size={20} />
-          </button>
+          
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="text-foodie-text hover:text-foodie-primary transition-colors">
+                  <User size={20} />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/profile">Profil</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/profile/settings">Paramètres</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/account">Commandes</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => signOut()}>
+                  Se déconnecter
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Link to="/login" className="text-foodie-text hover:text-foodie-primary transition-colors">
+              <User size={20} />
+            </Link>
+          )}
+          
           <Link 
             to="/cart" 
             className="text-foodie-text hover:text-foodie-primary transition-colors md:border-l md:pl-4 md:border-gray-200 relative"
@@ -67,7 +107,16 @@ const Header = () => {
               </span>
             )}
           </Link>
-          <Link to="/menu" className="hidden md:block btn-primary py-2">Order Online</Link>
+          
+          {!user ? (
+            <Link to="/login" className="hidden md:block btn-primary py-2">
+              Connexion
+            </Link>
+          ) : (
+            <Link to="/menu" className="hidden md:block btn-primary py-2">
+              Commander
+            </Link>
+          )}
           
           {/* Mobile Menu Button */}
           <button 
@@ -107,9 +156,16 @@ const Header = () => {
               </Link>
             </li>
             <li>
-              <Link to="/menu" className="btn-primary mt-4" onClick={() => setIsMenuOpen(false)}>
-                Order Online
-              </Link>
+              {user ? (
+                <Link to="/profile" className="flex items-center text-xl" onClick={() => setIsMenuOpen(false)}>
+                  <User className="mr-2" />
+                  Mon profil
+                </Link>
+              ) : (
+                <Link to="/login" className="btn-primary mt-4" onClick={() => setIsMenuOpen(false)}>
+                  Connexion
+                </Link>
+              )}
             </li>
           </ul>
         </div>

@@ -1,6 +1,7 @@
 
 import { createBrowserRouter, Outlet } from 'react-router-dom'
 import authRoutes from './routes-config/authRoutes'
+import profileRoutes from './routes-config/profileRoutes'
 import ScrollToTop from '@/components/custom/utils/ScrollToTop'
 import PrivateRoute from '@/components/custom/utils/PrivateRoute'
 import DynamicPageLoader from '@/components/custom/utils/LazyComponent'
@@ -54,7 +55,7 @@ const Router = createBrowserRouter([
 						path: '/account',
 						element: (
 							<PrivateRoute>
-								<>User Account</>
+								<DynamicPageLoader pageKey="account/UserAccount" />
 							</PrivateRoute>
 						)
 					},
@@ -81,6 +82,9 @@ const Router = createBrowserRouter([
 
 					// Authentication routes part
 					authRoutes,
+                    
+                    // Profile routes
+                    profileRoutes,
 				]
 			},
 		],
