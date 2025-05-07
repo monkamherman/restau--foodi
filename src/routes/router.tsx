@@ -43,6 +43,11 @@ const Router = createBrowserRouter([
 						path: '/',
 						element: <DynamicPageLoader pageKey="home/Home" />
 					},
+                    
+                    {
+						path: '/gallery',
+						element: <DynamicPageLoader pageKey="gallery/Gallery" />
+					},
 
 					// Exemple of private route
 					{

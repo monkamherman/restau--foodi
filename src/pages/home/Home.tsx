@@ -5,6 +5,7 @@ import Categories from '@/components/Categories';
 import FeaturedDishes from '@/components/FeaturedDishes';
 import Testimonials from '@/components/Testimonials';
 import Services from '@/components/Services';
+import GalleryPreview from '@/components/GalleryPreview';
 
 const Home = () => {
   return (
@@ -13,6 +14,7 @@ const Home = () => {
       <DishOfTheDay />
       <Categories />
       <FeaturedDishes />
+      <GalleryPreview />
       <Testimonials />
       <Services />
     </>

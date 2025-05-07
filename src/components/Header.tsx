@@ -14,6 +14,7 @@ const Header = () => {
   const menuItems = [
     { name: "Home", path: "/" },
     { name: "Menu", path: "/menu" },
+    { name: "Gallery", path: "/gallery" },
     { name: "Delivery", path: "/delivery" },
     { name: "About Us", path: "/about-us" },
     { name: "Blog", path: "/blog" }

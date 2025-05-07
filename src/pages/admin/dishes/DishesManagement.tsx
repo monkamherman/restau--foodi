@@ -1,37 +1,30 @@
-
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import AdminLayout from "../components/AdminLayout";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
 import { 
-  Table, 
-  TableBody, 
-  TableCaption, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
-  Edit, 
-  Trash2, 
-  Plus,
-  Star,
-  CheckCircle,
-  XCircle
-} from "lucide-react";
-import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { 
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-import {
+import { 
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -40,23 +33,29 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
+import { MoreHorizontal, Plus } from "lucide-react";
+import DishForm from "./DishForm";
 
-type Dish = {
+interface Dish {
   id: string;
   name: string;
-  description: string | null;
+  description: string;
   price: number;
-  category: string;
   image_url: string | null;
-  is_featured: boolean;
+  category: string;
   is_available: boolean;
-};
+  created_at: string;
+}
 
 const DishesManagement = () => {
   const [dishes, setDishes] = useState<Dish[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedDish, setSelectedDish] = useState<Dish | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -69,12 +68,9 @@ const DishesManagement = () => {
       const { data, error } = await supabase
         .from('dishes')
         .select('*')
-        .order('name');
-      
-      if (error) {
-        throw error;
-      }
-      
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
       setDishes(data || []);
     } catch (error: any) {
       toast({
@@ -87,23 +83,49 @@ const DishesManagement = () => {
     }
   };
 
-  const toggleFeatured = async (id: string, currentValue: boolean) => {
+  const handleAddDish = async (dishData: Partial<Dish>) => {
+    try {
+      const { data, error } = await supabase
+        .from('dishes')
+        .insert([dishData])
+        .select();
+
+      if (error) throw error;
+
+      toast({
+        title: "Dish added",
+        description: "The dish has been added successfully.",
+      });
+
+      setIsAddDialogOpen(false);
+      fetchDishes();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error adding dish",
+        description: error.message,
+      });
+    }
+  };
+
+  const handleEditDish = async (dishData: Partial<Dish>) => {
+    if (!selectedDish) return;
+
     try {
       const { error } = await supabase
         .from('dishes')
-        .update({ is_featured: !currentValue })
-        .eq('id', id);
-      
+        .update(dishData)
+        .eq('id', selectedDish.id);
+
       if (error) throw error;
-      
-      setDishes(dishes.map(dish => 
-        dish.id === id ? { ...dish, is_featured: !currentValue } : dish
-      ));
-      
+
       toast({
-        title: `Dish ${!currentValue ? 'featured' : 'unfeatured'}`,
-        description: `Successfully ${!currentValue ? 'featured' : 'unfeatured'} the dish`,
+        title: "Dish updated",
+        description: "The dish has been updated successfully.",
       });
+
+      setIsEditDialogOpen(false);
+      fetchDishes();
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -113,47 +135,24 @@ const DishesManagement = () => {
     }
   };
 
-  const toggleAvailability = async (id: string, currentValue: boolean) => {
-    try {
-      const { error } = await supabase
-        .from('dishes')
-        .update({ is_available: !currentValue })
-        .eq('id', id);
-      
-      if (error) throw error;
-      
-      setDishes(dishes.map(dish => 
-        dish.id === id ? { ...dish, is_available: !currentValue } : dish
-      ));
-      
-      toast({
-        title: `Dish ${!currentValue ? 'available' : 'unavailable'}`,
-        description: `Successfully marked the dish as ${!currentValue ? 'available' : 'unavailable'}`,
-      });
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error updating dish",
-        description: error.message,
-      });
-    }
-  };
+  const handleDeleteDish = async () => {
+    if (!selectedDish) return;
 
-  const deleteDish = async (id: string) => {
     try {
       const { error } = await supabase
         .from('dishes')
         .delete()
-        .eq('id', id);
-      
+        .eq('id', selectedDish.id);
+
       if (error) throw error;
-      
-      setDishes(dishes.filter(dish => dish.id !== id));
-      
+
       toast({
         title: "Dish deleted",
-        description: "Successfully deleted the dish",
+        description: "The dish has been deleted successfully.",
       });
+
+      setIsDeleteDialogOpen(false);
+      fetchDishes();
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -163,141 +162,159 @@ const DishesManagement = () => {
     }
   };
 
-  return (
-    <AdminLayout>
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Dishes Management</h1>
-          <Button asChild>
-            <Link to="/admin/dishes/new">
-              <Plus size={16} className="mr-2" />
-              Add Dish
-            </Link>
-          </Button>
-        </div>
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: 'EUR',
+    }).format(price);
+  };
 
-        {isLoading ? (
-          <div className="text-center p-12">Loading dishes...</div>
-        ) : dishes.length === 0 ? (
-          <div className="text-center p-12 bg-gray-50 rounded-lg">
-            <h2 className="text-xl font-semibold text-gray-600">No dishes found</h2>
-            <p className="text-gray-500 mt-1">Get started by adding your first dish</p>
-            <Button asChild className="mt-4">
-              <Link to="/admin/dishes/new">
-                <Plus size={16} className="mr-2" />
-                Add Your First Dish
-              </Link>
-            </Button>
-          </div>
-        ) : (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+  return (
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Dishes Management</h1>
+        <Button onClick={() => setIsAddDialogOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" /> Add Dish
+        </Button>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>All Dishes</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="py-8 text-center">Loading dishes...</div>
+          ) : dishes.length === 0 ? (
+            <div className="py-8 text-center text-muted-foreground">No dishes found</div>
+          ) : (
             <Table>
-              <TableCaption>List of all dishes in the restaurant</TableCaption>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Image</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Category</TableHead>
-                  <TableHead className="text-right">Price</TableHead>
-                  <TableHead className="text-center">Featured</TableHead>
-                  <TableHead className="text-center">Available</TableHead>
+                  <TableHead>Price</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {dishes.map((dish) => (
                   <TableRow key={dish.id}>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center space-x-3">
+                    <TableCell>
+                      <div className="h-12 w-12 rounded overflow-hidden bg-gray-100">
                         {dish.image_url ? (
-                          <img 
-                            src={dish.image_url} 
+                          <img
+                            src={dish.image_url}
                             alt={dish.name}
-                            className="h-10 w-10 rounded object-cover" 
+                            className="h-full w-full object-cover"
                           />
                         ) : (
-                          <div className="h-10 w-10 bg-gray-200 rounded flex items-center justify-center text-gray-400">
-                            No img
+                          <div className="h-full w-full flex items-center justify-center text-gray-400">
+                            No image
                           </div>
                         )}
-                        <div>
-                          {dish.name}
-                          {dish.description && (
-                            <p className="text-xs text-gray-500 line-clamp-1">
-                              {dish.description}
-                            </p>
-                          )}
-                        </div>
                       </div>
                     </TableCell>
+                    <TableCell className="font-medium">{dish.name}</TableCell>
                     <TableCell>{dish.category}</TableCell>
-                    <TableCell className="text-right">${dish.price.toFixed(2)}</TableCell>
-                    <TableCell className="text-center">
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={() => toggleFeatured(dish.id, dish.is_featured)}
-                        className={dish.is_featured ? "text-yellow-500" : "text-gray-400"}
+                    <TableCell>{formatPrice(dish.price)}</TableCell>
+                    <TableCell>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs ${
+                          dish.is_available
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
                       >
-                        <Star size={18} fill={dish.is_featured ? "currentColor" : "none"} />
-                      </Button>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={() => toggleAvailability(dish.id, dish.is_available)}
-                        className={dish.is_available ? "text-green-500" : "text-red-500"}
-                      >
-                        {dish.is_available ? (
-                          <CheckCircle size={18} />
-                        ) : (
-                          <XCircle size={18} />
-                        )}
-                      </Button>
+                        {dish.is_available ? "Available" : "Unavailable"}
+                      </span>
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end space-x-2">
-                        <Button variant="outline" size="icon" asChild>
-                          <Link to={`/admin/dishes/${dish.id}`}>
-                            <Edit size={16} />
-                          </Link>
-                        </Button>
-                        
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="text-red-500">
-                              <Trash2 size={16} />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete the
-                                dish "{dish.name}" and remove it from our servers.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction 
-                                onClick={() => deleteDish(dish.id)}
-                                className="bg-red-500 hover:bg-red-600"
-                              >
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Open menu</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setSelectedDish(dish);
+                              setIsEditDialogOpen(true);
+                            }}
+                          >
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="text-red-600"
+                            onClick={() => {
+                              setSelectedDish(dish);
+                              setIsDeleteDialogOpen(true);
+                            }}
+                          >
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-          </div>
-        )}
-      </div>
-    </AdminLayout>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Add Dish Dialog */}
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Add New Dish</DialogTitle>
+            <DialogDescription>
+              Fill in the details to add a new dish to the menu.
+            </DialogDescription>
+          </DialogHeader>
+          <DishForm onSubmit={handleAddDish} />
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Dish Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Edit Dish</DialogTitle>
+            <DialogDescription>
+              Update the details of the selected dish.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedDish && (
+            <DishForm initialData={selectedDish} onSubmit={handleEditDish} />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the dish
+              "{selectedDish?.name}" from the database.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteDish} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   );
 };
 
