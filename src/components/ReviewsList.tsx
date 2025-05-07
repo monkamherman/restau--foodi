@@ -16,7 +16,7 @@ interface Review {
   rating: number;
   comment: string | null;
   created_at: string;
-  profiles?: Profile;
+  profiles?: Profile | null;
 }
 
 interface ReviewsListProps {
@@ -63,7 +63,7 @@ const ReviewsList = ({ dishId, refreshTrigger = 0 }: ReviewsListProps) => {
         .from('reviews')
         .select(`
           *,
-          profiles:profiles(
+          profiles:user_id(
             first_name,
             last_name,
             avatar_url
@@ -74,14 +74,17 @@ const ReviewsList = ({ dishId, refreshTrigger = 0 }: ReviewsListProps) => {
       
       if (error) throw error;
       
-      // Transform the data to match our Review type
-      const formattedReviews: Review[] = data ? data.map(item => ({
-        id: item.id,
-        rating: item.rating,
-        comment: item.comment,
-        created_at: item.created_at,
-        profiles: item.profiles as unknown as Profile
-      })) : [];
+      // Process the data to handle potential issues with profiles
+      const formattedReviews: Review[] = data ? data.map(item => {
+        const review: Review = {
+          id: item.id,
+          rating: item.rating,
+          comment: item.comment,
+          created_at: item.created_at,
+          profiles: item.profiles as Profile | null
+        };
+        return review;
+      }) : [];
       
       setReviews(formattedReviews);
       

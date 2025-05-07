@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/auth";
 import { supabase } from "@/integrations/supabase/client";
-import AdminLayout from "./components/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Utensils, Users, Tag, ShoppingBag } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -62,78 +61,76 @@ const Dashboard = () => {
   }
 
   return (
-    <AdminLayout>
-      <div className="p-6">
-        <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <StatsCard 
-            title="Total Dishes" 
-            value={stats.totalDishes} 
-            icon={<Utensils size={24} />} 
-            isLoading={isLoading} 
-            color="bg-blue-50"
-            iconColor="text-blue-500"
-          />
-          <StatsCard 
-            title="Users" 
-            value={stats.totalUsers} 
-            icon={<Users size={24} />} 
-            isLoading={isLoading} 
-            color="bg-green-50"
-            iconColor="text-green-500"
-          />
-          <StatsCard 
-            title="Orders" 
-            value={stats.totalOrders} 
-            icon={<ShoppingBag size={24} />} 
-            isLoading={isLoading} 
-            color="bg-yellow-50"
-            iconColor="text-yellow-500"
-          />
-          <StatsCard 
-            title="Active Coupons" 
-            value={stats.activeCoupons} 
-            icon={<Tag size={24} />} 
-            isLoading={isLoading} 
-            color="bg-purple-50" 
-            iconColor="text-purple-500"
-          />
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Orders</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <div className="p-8 text-center">Loading recent orders...</div>
-              ) : (
-                <div>
-                  <p className="py-4 text-center text-muted-foreground">Coming soon</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Popular Dishes</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <div className="p-8 text-center">Loading popular dishes...</div>
-              ) : (
-                <div>
-                  <p className="py-4 text-center text-muted-foreground">Coming soon</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+    <div className="p-6">
+      <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <StatsCard 
+          title="Total Dishes" 
+          value={stats.totalDishes} 
+          icon={<Utensils size={24} />} 
+          isLoading={isLoading} 
+          color="bg-blue-50"
+          iconColor="text-blue-500"
+        />
+        <StatsCard 
+          title="Users" 
+          value={stats.totalUsers} 
+          icon={<Users size={24} />} 
+          isLoading={isLoading} 
+          color="bg-green-50"
+          iconColor="text-green-500"
+        />
+        <StatsCard 
+          title="Orders" 
+          value={stats.totalOrders} 
+          icon={<ShoppingBag size={24} />} 
+          isLoading={isLoading} 
+          color="bg-yellow-50"
+          iconColor="text-yellow-500"
+        />
+        <StatsCard 
+          title="Active Coupons" 
+          value={stats.activeCoupons} 
+          icon={<Tag size={24} />} 
+          isLoading={isLoading} 
+          color="bg-purple-50" 
+          iconColor="text-purple-500"
+        />
       </div>
-    </AdminLayout>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Orders</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="p-8 text-center">Loading recent orders...</div>
+            ) : (
+              <div>
+                <p className="py-4 text-center text-muted-foreground">Coming soon</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Popular Dishes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="p-8 text-center">Loading popular dishes...</div>
+            ) : (
+              <div>
+                <p className="py-4 text-center text-muted-foreground">Coming soon</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };
 

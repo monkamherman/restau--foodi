@@ -20,7 +20,7 @@ const Header = () => {
   ];
 
   return (
-    <header className="bg-white py-4 shadow-sm fixed w-full z-50">
+    <header className="bg-white py-4 shadow-sm sticky top-0 w-full z-50">
       <div className="container-custom flex items-center justify-between">
         <Link to="/" className="flex items-center z-10">
           <div className="bg-foodie-primary text-white font-bold px-2 py-1 rounded text-xl">MENU</div>

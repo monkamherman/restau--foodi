@@ -1,11 +1,11 @@
 
 import { createBrowserRouter, Outlet } from 'react-router-dom'
-import Navbar from '@/layouts/navbar/Navbar'
-import Footer from '@/layouts/footer/Footer'
 import authRoutes from './routes-config/authRoutes'
 import ScrollToTop from '@/components/custom/utils/ScrollToTop'
 import PrivateRoute from '@/components/custom/utils/PrivateRoute'
-import DynamicPageLoader from '@/components/custom/utils/LazyCompoment'
+import DynamicPageLoader from '@/components/custom/utils/LazyComponent'
+import Header from '@/components/Header'
+import Footer from '@/components/Footer'
 
 /**
  * Creates a router with specified routes and elements for each route.
@@ -32,7 +32,7 @@ const Router = createBrowserRouter([
 			{
 				path: '/',
 				element: <>
-					<Navbar />
+					<Header />
 					<div className='min-h-[80vh]'>
 						<Outlet />
 					</div>

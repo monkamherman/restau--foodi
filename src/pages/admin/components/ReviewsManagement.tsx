@@ -19,7 +19,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -46,7 +45,7 @@ interface Review {
   comment: string | null;
   created_at: string;
   user_id: string;
-  profiles: Profile;
+  profiles?: Profile | null;
 }
 
 type EmailFormValues = {
@@ -80,7 +79,7 @@ const ReviewsManagement = () => {
         .from("reviews")
         .select(`
           *,
-          profiles:profiles(
+          profiles:user_id (
             first_name,
             last_name,
             avatar_url
@@ -90,7 +89,20 @@ const ReviewsManagement = () => {
 
       if (error) throw error;
       
-      setReviews(data || []);
+      // Process the data to handle potential issues with profiles
+      const formattedReviews: Review[] = data ? data.map(item => {
+        const review: Review = {
+          id: item.id,
+          rating: item.rating,
+          comment: item.comment,
+          created_at: item.created_at,
+          user_id: item.user_id,
+          profiles: item.profiles as Profile | null
+        };
+        return review;
+      }) : [];
+      
+      setReviews(formattedReviews);
     } catch (error: any) {
       console.error("Error fetching reviews:", error);
       toast({
