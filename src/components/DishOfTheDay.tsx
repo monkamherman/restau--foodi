@@ -2,7 +2,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Dish } from "lucide-react";
+import { UtensilsCrossed } from "lucide-react";
 
 const DishOfTheDay = () => {
   // Données du plat du jour (ces données pourraient venir d'une API ou base de données)
@@ -26,7 +26,7 @@ const DishOfTheDay = () => {
     <section className="py-16 bg-foodie-primary/5">
       <div className="container-custom">
         <div className="flex items-center justify-center mb-6">
-          <Dish className="text-foodie-primary mr-2" size={28} />
+          <UtensilsCrossed className="text-foodie-primary mr-2" size={28} />
           <h2 className="text-2xl md:text-3xl font-bold">Le Plat du Jour</h2>
         </div>
         

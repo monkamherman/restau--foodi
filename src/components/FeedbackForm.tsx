@@ -5,28 +5,38 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/auth";
+import { AlertCircle } from "lucide-react";
 
 type FeedbackFormProps = {
   onSubmitSuccess?: () => void;
 };
 
 const FeedbackForm = ({ onSubmitSuccess }: FeedbackFormProps) => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [rating, setRating] = useState(5);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name || !email || !message) {
+    if (!user) {
       toast({
         variant: "destructive",
-        title: "Champs obligatoires",
-        description: "Veuillez remplir tous les champs du formulaire."
+        title: "Connexion requise",
+        description: "Vous devez être connecté pour laisser un avis."
+      });
+      return;
+    }
+    
+    if (!message) {
+      toast({
+        variant: "destructive",
+        title: "Message obligatoire",
+        description: "Veuillez écrire votre avis avant de l'envoyer."
       });
       return;
     }
@@ -34,14 +44,13 @@ const FeedbackForm = ({ onSubmitSuccess }: FeedbackFormProps) => {
     try {
       setIsSubmitting(true);
       
-      // Utiliser la table reviews qui existe déjà dans la base de données
-      // au lieu de feedback qui n'existe pas
       const { error } = await supabase
         .from("reviews")
         .insert({
           comment: message,
           rating: rating,
-          // Pas besoin d'user_id ou dish_id car c'est juste un feedback général
+          user_id: user.id,
+          // Pas besoin de dish_id car c'est un feedback général
         });
         
       if (error) throw error;
@@ -52,8 +61,6 @@ const FeedbackForm = ({ onSubmitSuccess }: FeedbackFormProps) => {
       });
       
       // Réinitialiser le formulaire
-      setName("");
-      setEmail("");
       setMessage("");
       setRating(5);
       
@@ -72,35 +79,23 @@ const FeedbackForm = ({ onSubmitSuccess }: FeedbackFormProps) => {
     }
   };
 
+  if (!user) {
+    return (
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 text-center">
+        <AlertCircle className="mx-auto h-12 w-12 text-amber-500 mb-4" />
+        <h3 className="text-lg font-medium mb-2">Connexion requise</h3>
+        <p className="text-muted-foreground mb-4">
+          Vous devez être connecté pour laisser un avis. Connectez-vous pour partager votre expérience.
+        </p>
+        <Button asChild variant="outline">
+          <a href="/login">Se connecter</a>
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl mx-auto">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium mb-2">
-            Votre Nom
-          </label>
-          <Input
-            id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Entrez votre nom"
-          />
-        </div>
-        
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium mb-2">
-            Email
-          </label>
-          <Input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="votre@email.com"
-          />
-        </div>
-      </div>
-      
       <div>
         <label htmlFor="rating" className="block text-sm font-medium mb-2">
           Note (1-5)
@@ -123,7 +118,7 @@ const FeedbackForm = ({ onSubmitSuccess }: FeedbackFormProps) => {
       
       <div>
         <label htmlFor="message" className="block text-sm font-medium mb-2">
-          Votre Message
+          Votre Avis
         </label>
         <Textarea
           id="message"
