@@ -51,18 +51,27 @@ interface Dish {
   ingredients?: string[];
 }
 
-// Type pour la soumission du formulaire
-type DishFormData = Omit<Dish, 'id'>;
+// Type for the form submission data - make all required properties explicit
+type DishFormData = {
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  image_url: string;
+  is_available: boolean;
+  ingredients?: string[];
+};
 
-const dishSchema = yup.object({
+// Define the schema to match our DishFormData type exactly
+const dishSchema = yup.object().shape({
   name: yup.string().required("Dish name is required"),
   description: yup.string().required("Description is required"),
   price: yup.number().required("Price is required").positive("Price must be positive"),
   category: yup.string().required("Category is required"),
   image_url: yup.string().required("Image URL is required"),
   is_available: yup.boolean().default(true),
-  ingredients: yup.array().of(yup.string()).default([]),
-}).required();
+  ingredients: yup.array().of(yup.string()).default([])
+});
 
 const DishForm = ({ initialData, onSubmit }: DishFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -233,7 +242,12 @@ const DishForm = ({ initialData, onSubmit }: DishFormProps) => {
                   <FormItem>
                     <FormLabel>Price</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="Enter price" {...field} />
+                      <Input 
+                        type="number" 
+                        placeholder="Enter price" 
+                        {...field}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value))} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

@@ -76,7 +76,17 @@ const ReviewsList = ({ dishId, refreshTrigger = 0 }: ReviewsListProps) => {
       
       // Process the data to handle potential issues with profiles
       const formattedReviews: Review[] = data ? data.map(item => {
-        const profile = item.profiles as Profile | null;
+        // Use type assertion with unknown intermediate step to handle potential errors safely
+        const profileData = item.profiles as unknown;
+        let profile: Profile | null = null;
+        
+        // Check if profiles data exists and has the expected structure
+        if (profileData && typeof profileData === 'object' && 
+            'first_name' in profileData && 
+            'last_name' in profileData && 
+            'avatar_url' in profileData) {
+          profile = profileData as Profile;
+        }
         
         const review: Review = {
           id: item.id,
