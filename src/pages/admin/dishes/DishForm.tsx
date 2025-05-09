@@ -1,80 +1,16 @@
-import { useState, useEffect, useCallback } from "react";
+
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-import { supabase } from "@/integrations/supabase/client";
-import { 
-  Form, 
-  FormControl, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage,
-  FormDescription
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { v4 as uuidv4 } from 'uuid';
-import { useDropzone } from 'react-dropzone';
-
-interface DishFormProps {
-  initialData?: Dish;
-  onSubmit: (data: DishFormData) => Promise<void>;
-}
-
-interface Dish {
-  id?: string;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  image_url: string;
-  is_available: boolean;
-  ingredients?: string[];
-}
-
-// Type for the form submission data - make all required properties explicit
-type DishFormData = {
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  image_url: string;
-  is_available: boolean;
-  ingredients?: string[];
-};
-
-// Define the schema to match our DishFormData type exactly
-const dishSchema = yup.object({
-  name: yup.string().required("Dish name is required"),
-  description: yup.string().required("Description is required"),
-  price: yup.number().required("Price is required").positive("Price must be positive"),
-  category: yup.string().required("Category is required"),
-  image_url: yup.string().required("Image URL is required"),
-  is_available: yup.boolean().default(true),
-  ingredients: yup.array().of(yup.string()).default([])
-}).required();
+import DishFormFields from "./components/DishFormFields";
+import { DishFormProps, DishFormData, dishSchema } from "./types/dishFormTypes";
 
 const DishForm = ({ initialData, onSubmit }: DishFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [file, setFile] = useState<File | null>(null);
-  const { toast } = useToast();
 
   const form = useForm<DishFormData>({
     resolver: yupResolver(dishSchema),
@@ -92,67 +28,12 @@ const DishForm = ({ initialData, onSubmit }: DishFormProps) => {
   useEffect(() => {
     if (initialData) {
       form.reset(initialData);
-      setImagePreview(initialData.image_url);
     }
   }, [initialData, form]);
 
-  const handleImageUpload = async () => {
-    if (!file) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Please select an image to upload.",
-      });
-      return;
-    }
-
-    setUploading(true);
-    try {
-      const imageName = `${uuidv4()}-${file.name}`;
-      const { data, error } = await supabase.storage
-        .from("dishes")
-        .upload(imageName, file, {
-          cacheControl: "3600",
-          upsert: false,
-        });
-
-      if (error) throw error;
-
-      // Construct URL manually instead of using storageUrl
-      const imageUrl = `https://lubfehdynarfcskleimf.supabase.co/storage/v1/object/public/dishes/${imageName}`;
-      form.setValue("image_url", imageUrl);
-      setImagePreview(imageUrl);
-
-      toast({
-        title: "Image uploaded",
-        description: "Image has been uploaded successfully.",
-      });
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error uploading image",
-        description: error.message,
-      });
-    } finally {
-      setUploading(false);
-      setIsImageDialogOpen(false);
-      setFile(null);
-    }
+  const handleSubmit = async (data: DishFormData) => {
+    await onSubmit(data);
   };
-
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
-    setFile(file);
-    setImagePreview(URL.createObjectURL(file));
-  }, []);
-
-  const { getRootProps, getInputProps } = useDropzone({
-    onDrop,
-    multiple: false,
-    accept: {
-      'image/*': ['.jpeg', '.png', '.jpg', '.gif', '.svg']
-    },
-  });
 
   return (
     <Card>
@@ -169,173 +50,9 @@ const DishForm = ({ initialData, onSubmit }: DishFormProps) => {
           </div>
         ) : (
           <Form {...form}>
-            <form onSubmit={form.handleSubmit((data) => onSubmit(data))} className="space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Dish Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter dish name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Category</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a category" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="pizza">Pizza</SelectItem>
-                          <SelectItem value="burger">Burger</SelectItem>
-                          <SelectItem value="sushi">Sushi</SelectItem>
-                          <SelectItem value="pasta">Pasta</SelectItem>
-                          <SelectItem value="salad">Salad</SelectItem>
-                          <SelectItem value="dessert">Dessert</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Enter dish description"
-                        className="resize-none"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Price</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        placeholder="Enter price" 
-                        {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value))} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <FormField
-                  control={form.control}
-                  name="image_url"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Image URL</FormLabel>
-                      <FormControl>
-                        <div className="flex items-center space-x-4">
-                          <Input placeholder="Enter image URL" {...field} />
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button variant="outline">Upload Image</Button>
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-[425px]">
-                              <DialogHeader>
-                                <DialogTitle>Image Upload</DialogTitle>
-                                <DialogDescription>
-                                  Upload a new image from your computer.
-                                </DialogDescription>
-                              </DialogHeader>
-                              <div className="grid gap-4 py-4">
-                                <div className="flex items-center justify-center p-4 border-2 border-dashed rounded-md">
-                                  <div 
-                                    {...getRootProps()}
-                                    className="flex flex-col items-center justify-center w-full h-40 cursor-pointer"
-                                  >
-                                    <input {...getInputProps()} />
-                                    {imagePreview ? (
-                                      <img 
-                                        src={imagePreview} 
-                                        alt="Preview" 
-                                        className="max-w-full max-h-full object-contain" 
-                                      />
-                                    ) : (
-                                      <p className="text-sm text-muted-foreground">
-                                        Drag 'n' drop an image here, or click to select files
-                                      </p>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                              <DialogFooter>
-                                <Button type="button" onClick={handleImageUpload} disabled={uploading}>
-                                  {uploading ? "Uploading..." : "Upload"}
-                                </Button>
-                              </DialogFooter>
-                            </DialogContent>
-                          </Dialog>
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                      {imagePreview && (
-                        <div className="mt-2">
-                          <img
-                            src={imagePreview}
-                            alt="Image Preview"
-                            className="w-32 h-32 object-cover rounded-md"
-                          />
-                        </div>
-                      )}
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="is_available"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                      <div className="space-y-0.5">
-                        <FormLabel>Available</FormLabel>
-                        <FormDescription>
-                          Determine if the dish is available for order.
-                        </FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+              <DishFormFields form={form} />
+              
               <Button type="submit" disabled={isLoading}>
                 {initialData ? "Update Dish" : "Create Dish"}
               </Button>
