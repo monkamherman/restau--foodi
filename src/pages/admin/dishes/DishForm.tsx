@@ -1,6 +1,4 @@
-
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -19,7 +17,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -30,7 +27,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { v4 as uuidv4 } from 'uuid';
 import { useDropzone } from 'react-dropzone';
@@ -63,7 +59,7 @@ type DishFormData = {
 };
 
 // Define the schema to match our DishFormData type exactly
-const dishSchema = yup.object().shape({
+const dishSchema = yup.object({
   name: yup.string().required("Dish name is required"),
   description: yup.string().required("Description is required"),
   price: yup.number().required("Price is required").positive("Price must be positive"),
@@ -71,11 +67,10 @@ const dishSchema = yup.object().shape({
   image_url: yup.string().required("Image URL is required"),
   is_available: yup.boolean().default(true),
   ingredients: yup.array().of(yup.string()).default([])
-});
+}).required();
 
 const DishForm = ({ initialData, onSubmit }: DishFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
