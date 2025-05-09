@@ -12,19 +12,19 @@ import { AuthProvider } from "@/hooks/auth";
 
 const queryClient = new QueryClient();
 
+// We need to use a different approach to avoid router context issues
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <ThemeProvider defaultTheme="light" storageKey="restaurant-theme">
-        <TooltipProvider>
-          <RouterProvider router={Router} />
-          <ScrollProgressBar />
-          <Toaster />
-          <Sonner />
-          <OfflineAlert />
-        </TooltipProvider>
-      </ThemeProvider>
-    </AuthProvider>
+    <ThemeProvider defaultTheme="light" storageKey="restaurant-theme">
+      <TooltipProvider>
+        {/* AuthProvider is now rendered by the router itself */}
+        <RouterProvider router={Router} />
+        <ScrollProgressBar />
+        <Toaster />
+        <Sonner />
+        <OfflineAlert />
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

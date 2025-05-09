@@ -6,11 +6,42 @@ import EmptyState from "./EmptyState";
 import { Star } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
+
+interface Review {
+  id: string;
+  dish_id: string;
+  rating: number;
+  comment: string | null;
+  created_at: string;
+  dish: {
+    name: string;
+    image_url: string | null;
+  } | null;
+}
+
+const StarRating = ({ rating }: { rating: number }) => {
+  return (
+    <div className="flex">
+      {[...Array(5)].map((_, i) => (
+        <Star
+          key={i}
+          size={16}
+          className={cn(
+            i < rating ? "text-yellow-500 fill-yellow-500" : "text-gray-300",
+            "mr-0.5"
+          )}
+        />
+      ))}
+    </div>
+  );
+};
 
 const ReviewsTab = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [reviews, setReviews] = useState([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
@@ -27,7 +58,13 @@ const ReviewsTab = () => {
       
       const { data, error } = await supabase
         .from('reviews')
-        .select('*')
+        .select(`
+          *,
+          dish:dish_id (
+            name,
+            image_url
+          )
+        `)
         .eq('user_id', user.id);
         
       if (error) throw error;
@@ -67,10 +104,42 @@ const ReviewsTab = () => {
   
   return (
     <Card className="p-6">
-      <h2 className="text-2xl font-bold mb-4">Your Reviews</h2>
+      <h2 className="text-2xl font-bold mb-6">Your Reviews</h2>
       
-      <div className="text-muted-foreground">
-        Coming soon: View and manage all your reviews here.
+      <div className="space-y-6">
+        {reviews.map((review) => (
+          <div key={review.id} className="border-b pb-6 last:border-b-0">
+            <div className="flex gap-4">
+              {review.dish?.image_url ? (
+                <Avatar className="w-16 h-16 rounded-md">
+                  <AvatarImage src={review.dish.image_url} alt={review.dish?.name || 'Dish'} className="object-cover" />
+                  <AvatarFallback className="rounded-md">
+                    {review.dish?.name?.[0] || '?'}
+                  </AvatarFallback>
+                </Avatar>
+              ) : (
+                <div className="w-16 h-16 bg-muted flex items-center justify-center rounded-md">
+                  <Star className="text-muted-foreground" />
+                </div>
+              )}
+              
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium">{review.dish?.name || 'Unknown Dish'}</h4>
+                  <span className="text-sm text-muted-foreground">
+                    {new Date(review.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+                
+                <div className="mt-1 mb-2">
+                  <StarRating rating={review.rating} />
+                </div>
+                
+                {review.comment && <p className="text-muted-foreground">{review.comment}</p>}
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </Card>
   );

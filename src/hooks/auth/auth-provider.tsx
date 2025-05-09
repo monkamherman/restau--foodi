@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from '@supabase/supabase-js';
@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const isSuperAdmin = userRoles.includes('super-admin');
 
   // Fetch user roles from the database
-  const fetchUserRoles = async (userId: string) => {
+  const fetchUserRoles = useCallback(async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from('user_roles')
@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } catch (error) {
       console.error('Error fetching user roles:', error);
     }
-  };
+  }, []);
 
   useEffect(() => {
     // Set up auth state listener first
@@ -74,10 +74,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [fetchUserRoles]);
 
   // Sign in with email and password
-  const signIn = async (email: string, password: string) => {
+  const signIn = useCallback(async (email: string, password: string) => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       
@@ -99,10 +99,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.error("Auth error:", error);
       throw error;
     }
-  };
+  }, [navigate, toast]);
 
   // Sign up with email and password
-  const signUp = async (email: string, password: string, firstName?: string, lastName?: string) => {
+  const signUp = useCallback(async (email: string, password: string, firstName?: string, lastName?: string) => {
     try {
       // Option pour les tests: utiliser la connexion automatique
       const { data, error } = await supabase.auth.signUp({ 
@@ -151,10 +151,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.error("Registration error:", error);
       throw error;
     }
-  };
+  }, [fetchUserRoles]);
 
   // Sign out
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     try {
       await supabase.auth.signOut();
       setUser(null);
@@ -168,10 +168,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         description: error.message || "Échec de la déconnexion",
       });
     }
-  };
+  }, [navigate, toast]);
 
   // Request password reset
-  const forgotPassword = async (email: string) => {
+  const forgotPassword = useCallback(async (email: string) => {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/change-password`,
@@ -188,10 +188,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         description: error.message || "Échec de l'envoi du lien de réinitialisation",
       });
     }
-  };
+  }, [toast]);
 
   // Set new password after reset
-  const resetPassword = async (password: string) => {
+  const resetPassword = useCallback(async (password: string) => {
     try {
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
@@ -207,7 +207,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         description: error.message || "Échec de la réinitialisation du mot de passe",
       });
     }
-  };
+  }, [navigate, toast]);
 
   const value = {
     user,

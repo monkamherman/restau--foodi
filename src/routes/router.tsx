@@ -7,6 +7,7 @@ import PrivateRoute from '@/components/custom/utils/PrivateRoute'
 import DynamicPageLoader from '@/components/custom/utils/LazyComponent'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+import { AuthProvider } from '@/hooks/auth'
 
 /**
  * Creates a router with specified routes and elements for each route.
@@ -18,12 +19,11 @@ const Router = createBrowserRouter([
 	{
 		path: '',
 		element: (
-			<>
+			<AuthProvider>
 				<Outlet />
-
 				{/* To scroll to top each time that we change routes */}
 				<ScrollToTop />
-			</>
+			</AuthProvider>
 		),
 
 		// Page erreur
