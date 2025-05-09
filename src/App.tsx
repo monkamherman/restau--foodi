@@ -8,7 +8,6 @@ import Router from "@/routes/router";
 import { RouterProvider } from "react-router-dom";
 import ScrollProgressBar from '@/components/custom/utils/ScrollProgress';
 import OfflineAlert from '@/components/custom/utils/OfflineAlert';
-import { AuthProvider } from "@/hooks/auth";
 
 const queryClient = new QueryClient();
 

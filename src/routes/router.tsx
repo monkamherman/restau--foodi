@@ -20,9 +20,11 @@ const Router = createBrowserRouter([
 		path: '',
 		element: (
 			<AuthProvider>
-				<Outlet />
-				{/* To scroll to top each time that we change routes */}
-				<ScrollToTop />
+				<>
+					<Outlet />
+					{/* To scroll to top each time that we change routes */}
+					<ScrollToTop />
+				</>
 			</AuthProvider>
 		),
 
@@ -45,7 +47,17 @@ const Router = createBrowserRouter([
 						element: <DynamicPageLoader pageKey="home/Home" />
 					},
                     
+					{
+						path: '/menu',
+						element: <DynamicPageLoader pageKey="menu/Menu" />
+					},
+                    
                     {
+						path: '/delivery',
+						element: <DynamicPageLoader pageKey="delivery/Delivery" />
+					},
+                    
+					{
 						path: '/gallery',
 						element: <DynamicPageLoader pageKey="gallery/Gallery" />
 					},

@@ -6,11 +6,18 @@ import { Loader } from 'lucide-react';
 const DynamicPageLoader = ({ pageKey }: { pageKey: string }) => {
   // Use React.lazy to dynamically import the component
   const LazyComponent = lazy(() => {
-    // Split the key into directory and file parts
-    const [directory, file] = pageKey.split('/');
-    
-    // Import the component based on directory structure
-    return import(`../../../pages/${directory}/${file}.tsx`);
+    try {
+      // Split the key into directory and file parts
+      const parts = pageKey.split('/');
+      const file = parts.pop() || '';
+      const directory = parts.join('/');
+      
+      // Import the component based on directory structure
+      return import(`../../../pages/${directory ? directory + '/' : ''}${file}.tsx`);
+    } catch (error) {
+      console.error('Error loading component:', error);
+      throw error;
+    }
   });
 
   // Wrap with Suspense to handle loading state
