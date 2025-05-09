@@ -8,20 +8,26 @@ import Router from "@/routes/router";
 import { RouterProvider } from "react-router-dom";
 import ScrollProgressBar from '@/components/custom/utils/ScrollProgress';
 import OfflineAlert from '@/components/custom/utils/OfflineAlert';
+import { AuthProvider } from "@/hooks/auth";
+import { BrowserRouter } from "react-router-dom";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <RouterProvider router={Router} />
-      <ThemeProvider defaultTheme="light" storageKey="restaurant-theme">
-        <TooltipProvider>
-          <ScrollProgressBar />
-          <Toaster />
-          <Sonner />
-          <OfflineAlert />
-        </TooltipProvider>
-      </ThemeProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <RouterProvider router={Router} />
+        <ThemeProvider defaultTheme="light" storageKey="restaurant-theme">
+          <TooltipProvider>
+            <ScrollProgressBar />
+            <Toaster />
+            <Sonner />
+            <OfflineAlert />
+          </TooltipProvider>
+        </ThemeProvider>
+      </AuthProvider>
+    </BrowserRouter>
   </QueryClientProvider>
 );
 
