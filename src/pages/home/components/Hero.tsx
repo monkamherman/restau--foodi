@@ -71,7 +71,7 @@ const Hero = () => {
             <div className="relative">
               <div className="w-64 h-64 md:w-80 md:h-80 lg:w-96 lg:h-96 bg-foodie-primary rounded-full mx-auto overflow-hidden">
                 <img 
-                  src="/lovable-uploads/c0af146a-7752-4884-b2aa-f4b671f147ac.png" 
+                  src="/chef.jpeg" 
                   alt="Hero Image" 
                   className="w-full h-full object-cover"
                 />
