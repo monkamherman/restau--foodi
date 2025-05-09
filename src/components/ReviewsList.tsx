@@ -76,12 +76,14 @@ const ReviewsList = ({ dishId, refreshTrigger = 0 }: ReviewsListProps) => {
       
       // Process the data to handle potential issues with profiles
       const formattedReviews: Review[] = data ? data.map(item => {
+        const profile = item.profiles as Profile | null;
+        
         const review: Review = {
           id: item.id,
           rating: item.rating,
           comment: item.comment,
           created_at: item.created_at,
-          profiles: item.profiles as Profile | null
+          profiles: profile
         };
         return review;
       }) : [];

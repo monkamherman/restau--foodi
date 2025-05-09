@@ -70,11 +70,12 @@ const ReviewsManagement = () => {
         // Handle the data properly, ensuring the profile property is correctly typed
         const formattedReviews = data.map(review => {
           // Handle the case where profiles might be an error or doesn't have the expected shape
+          const profile = review.profiles && typeof review.profiles === 'object' ? 
+            review.profiles as unknown as Profile : undefined;
+          
           const formattedReview: Review = {
             ...review,
-            profile: review.profiles && typeof review.profiles === 'object' && !('error' in review.profiles) 
-              ? review.profiles as unknown as Profile 
-              : undefined
+            profile
           };
           
           return formattedReview;
@@ -226,6 +227,30 @@ const ReviewsManagement = () => {
       </Dialog>
     </div>
   );
+
+  function renderRatingStars(rating: number) {
+    return Array(5)
+      .fill(0)
+      .map((_, i) => (
+        <Star
+          key={i}
+          size={16}
+          className={i < rating ? "fill-foodie-rating text-foodie-rating" : "text-gray-300"}
+        />
+      ));
+  }
+
+  function handleSendResponse() {
+    // In a real application, this would send an email to the user
+    // For now, we'll just simulate success
+    toast({
+      title: "Response sent",
+      description: `Your response to the review has been sent.`,
+    });
+    
+    setIsResponseDialogOpen(false);
+    setResponseText("");
+  }
 };
 
 export default ReviewsManagement;

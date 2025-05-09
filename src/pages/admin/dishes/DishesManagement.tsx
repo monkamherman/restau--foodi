@@ -49,6 +49,11 @@ interface Dish {
   created_at: string;
 }
 
+// Définition des types requis pour le formulaire
+type DishFormData = Omit<Dish, 'id' | 'created_at'> & {
+  id?: string;
+};
+
 const DishesManagement = () => {
   const [dishes, setDishes] = useState<Dish[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -83,7 +88,7 @@ const DishesManagement = () => {
     }
   };
 
-  const handleAddDish = async (dishData: Partial<Dish>) => {
+  const handleAddDish = async (dishData: DishFormData) => {
     try {
       const { data, error } = await supabase
         .from('dishes')
@@ -108,7 +113,7 @@ const DishesManagement = () => {
     }
   };
 
-  const handleEditDish = async (dishData: Partial<Dish>) => {
+  const handleEditDish = async (dishData: DishFormData) => {
     if (!selectedDish) return;
 
     try {
@@ -291,7 +296,10 @@ const DishesManagement = () => {
             </DialogDescription>
           </DialogHeader>
           {selectedDish && (
-            <DishForm initialData={selectedDish} onSubmit={handleEditDish} />
+            <DishForm 
+              initialData={selectedDish}
+              onSubmit={handleEditDish} 
+            />
           )}
         </DialogContent>
       </Dialog>

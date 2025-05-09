@@ -1,6 +1,7 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,7 +11,8 @@ import {
   FormField, 
   FormItem, 
   FormLabel, 
-  FormMessage 
+  FormMessage,
+  FormDescription
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,9 +32,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, Trash } from "lucide-react";
 import { v4 as uuidv4 } from 'uuid';
 import { useDropzone } from 'react-dropzone';
+
+interface DishFormProps {
+  initialData?: Dish;
+  onSubmit: (data: DishFormData) => Promise<void>;
+}
 
 interface Dish {
   id?: string;
@@ -42,8 +48,11 @@ interface Dish {
   category: string;
   image_url: string;
   is_available: boolean;
-  ingredients: string[];
+  ingredients?: string[];
 }
+
+// Type pour la soumission du formulaire
+type DishFormData = Omit<Dish, 'id'>;
 
 const dishSchema = yup.object({
   name: yup.string().required("Dish name is required"),
@@ -55,19 +64,17 @@ const dishSchema = yup.object({
   ingredients: yup.array().of(yup.string()).default([]),
 }).required();
 
-const DishForm = () => {
+const DishForm = ({ initialData, onSubmit }: DishFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
-  const navigate = useNavigate();
-  const { dishId } = useParams<{ dishId: string }>();
   const { toast } = useToast();
 
-  const form = useForm<Dish>({
+  const form = useForm<DishFormData>({
     resolver: yupResolver(dishSchema),
-    defaultValues: {
+    defaultValues: initialData || {
       name: "",
       description: "",
       price: 0,
@@ -79,69 +86,11 @@ const DishForm = () => {
   });
 
   useEffect(() => {
-    if (dishId) {
-      setIsLoading(true);
-      supabase
-        .from("dishes")
-        .select("*")
-        .eq("id", dishId)
-        .single()
-        .then(({ data, error }) => {
-          if (error) {
-            toast({
-              variant: "destructive",
-              title: "Error fetching dish",
-              description: error.message,
-            });
-            navigate("/admin/dishes");
-          }
-          if (data) {
-            form.reset(data);
-            setImagePreview(data.image_url);
-          }
-        })
-        .finally(() => setIsLoading(false));
+    if (initialData) {
+      form.reset(initialData);
+      setImagePreview(initialData.image_url);
     }
-  }, [dishId, form, navigate, toast]);
-
-  const onSubmit = async (values: Dish) => {
-    setIsLoading(true);
-    try {
-      if (dishId) {
-        // Update existing dish
-        const { error } = await supabase
-          .from("dishes")
-          .update(values)
-          .eq("id", dishId);
-
-        if (error) throw error;
-
-        toast({
-          title: "Dish updated",
-          description: "Dish has been updated successfully.",
-        });
-      } else {
-        // Create new dish
-        const { error } = await supabase.from("dishes").insert([values]);
-
-        if (error) throw error;
-
-        toast({
-          title: "Dish created",
-          description: "Dish has been created successfully.",
-        });
-      }
-      navigate("/admin/dishes");
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error saving dish",
-        description: error.message,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [initialData, form]);
 
   const handleImageUpload = async () => {
     if (!file) {
@@ -165,7 +114,8 @@ const DishForm = () => {
 
       if (error) throw error;
 
-      const imageUrl = `${supabase.storageUrl}/dishes/${data.path}`;
+      // Construct URL manually instead of using storageUrl
+      const imageUrl = `https://lubfehdynarfcskleimf.supabase.co/storage/v1/object/public/dishes/${imageName}`;
       form.setValue("image_url", imageUrl);
       setImagePreview(imageUrl);
 
@@ -201,198 +151,190 @@ const DishForm = () => {
   });
 
   return (
-    <div>
-      <div className="mb-8">
-        <Button variant="outline" onClick={() => navigate("/admin/dishes")}>
-          Back to Dishes
-        </Button>
-      </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>{initialData ? "Edit Dish" : "Create New Dish"}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="grid gap-4">
+            <Skeleton className="h-8 w-full" />
+            <Skeleton className="h-8 w-full" />
+            <Skeleton className="h-8 w-full" />
+            <Skeleton className="h-8 w-full" />
+          </div>
+        ) : (
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit((data) => onSubmit(data))} className="space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Dish Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter dish name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{dishId ? "Edit Dish" : "Create New Dish"}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="grid gap-4">
-              <Skeleton className="h-8 w-full" />
-              <Skeleton className="h-8 w-full" />
-              <Skeleton className="h-8 w-full" />
-              <Skeleton className="h-8 w-full" />
-            </div>
-          ) : (
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Dish Name</FormLabel>
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Category</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <Input placeholder="Enter dish name" {...field} />
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a category" />
+                          </SelectTrigger>
                         </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="category"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Category</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a category" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="pizza">Pizza</SelectItem>
-                            <SelectItem value="burger">Burger</SelectItem>
-                            <SelectItem value="sushi">Sushi</SelectItem>
-                            <SelectItem value="pasta">Pasta</SelectItem>
-                            <SelectItem value="salad">Salad</SelectItem>
-                            <SelectItem value="dessert">Dessert</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Enter dish description"
-                          className="resize-none"
-                          {...field}
-                        />
-                      </FormControl>
+                        <SelectContent>
+                          <SelectItem value="pizza">Pizza</SelectItem>
+                          <SelectItem value="burger">Burger</SelectItem>
+                          <SelectItem value="sushi">Sushi</SelectItem>
+                          <SelectItem value="pasta">Pasta</SelectItem>
+                          <SelectItem value="salad">Salad</SelectItem>
+                          <SelectItem value="dessert">Dessert</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+              </div>
 
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Enter dish description"
+                        className="resize-none"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Price</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="Enter price" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <FormField
                   control={form.control}
-                  name="price"
+                  name="image_url"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Price</FormLabel>
+                      <FormLabel>Image URL</FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="Enter price" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <FormField
-                    control={form.control}
-                    name="image_url"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Image URL</FormLabel>
-                        <FormControl>
-                          <div className="flex items-center space-x-4">
-                            <Input placeholder="Enter image URL" {...field} />
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <Button variant="outline">Upload Image</Button>
-                              </DialogTrigger>
-                              <DialogContent className="sm:max-w-[425px]">
-                                <DialogHeader>
-                                  <DialogTitle>Image Upload</DialogTitle>
-                                  <DialogDescription>
-                                    Upload a new image from your computer.
-                                  </DialogDescription>
-                                </DialogHeader>
-                                <div className="grid gap-4 py-4">
-                                  <div className="flex items-center justify-center p-4 border-2 border-dashed rounded-md">
-                                    <div 
-                                      {...getRootProps()}
-                                      className="flex flex-col items-center justify-center w-full h-40 cursor-pointer"
-                                    >
-                                      <input {...getInputProps()} />
-                                      {imagePreview ? (
-                                        <img 
-                                          src={imagePreview} 
-                                          alt="Preview" 
-                                          className="max-w-full max-h-full object-contain" 
-                                        />
-                                      ) : (
-                                        <p className="text-sm text-muted-foreground">
-                                          Drag 'n' drop an image here, or click to select files
-                                        </p>
-                                      )}
-                                    </div>
+                        <div className="flex items-center space-x-4">
+                          <Input placeholder="Enter image URL" {...field} />
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="outline">Upload Image</Button>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-[425px]">
+                              <DialogHeader>
+                                <DialogTitle>Image Upload</DialogTitle>
+                                <DialogDescription>
+                                  Upload a new image from your computer.
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="grid gap-4 py-4">
+                                <div className="flex items-center justify-center p-4 border-2 border-dashed rounded-md">
+                                  <div 
+                                    {...getRootProps()}
+                                    className="flex flex-col items-center justify-center w-full h-40 cursor-pointer"
+                                  >
+                                    <input {...getInputProps()} />
+                                    {imagePreview ? (
+                                      <img 
+                                        src={imagePreview} 
+                                        alt="Preview" 
+                                        className="max-w-full max-h-full object-contain" 
+                                      />
+                                    ) : (
+                                      <p className="text-sm text-muted-foreground">
+                                        Drag 'n' drop an image here, or click to select files
+                                      </p>
+                                    )}
                                   </div>
                                 </div>
-                                <DialogFooter>
-                                  <Button type="button" onClick={handleImageUpload} disabled={uploading}>
-                                    {uploading ? "Uploading..." : "Upload"}
-                                  </Button>
-                                </DialogFooter>
-                              </DialogContent>
-                            </Dialog>
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                        {imagePreview && (
-                          <div className="mt-2">
-                            <img
-                              src={imagePreview}
-                              alt="Image Preview"
-                              className="w-32 h-32 object-cover rounded-md"
-                            />
-                          </div>
-                        )}
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="is_available"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                        <div className="space-y-0.5">
-                          <FormLabel>Available</FormLabel>
-                          <FormDescription>
-                            Determine if the dish is available for order.
-                          </FormDescription>
+                              </div>
+                              <DialogFooter>
+                                <Button type="button" onClick={handleImageUpload} disabled={uploading}>
+                                  {uploading ? "Uploading..." : "Upload"}
+                                </Button>
+                              </DialogFooter>
+                            </DialogContent>
+                          </Dialog>
                         </div>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
+                      </FormControl>
+                      <FormMessage />
+                      {imagePreview && (
+                        <div className="mt-2">
+                          <img
+                            src={imagePreview}
+                            alt="Image Preview"
+                            className="w-32 h-32 object-cover rounded-md"
                           />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                        </div>
+                      )}
+                    </FormItem>
+                  )}
+                />
 
-                <Button type="submit" disabled={isLoading}>
-                  {dishId ? "Update Dish" : "Create Dish"}
-                </Button>
-              </form>
-            </Form>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+                <FormField
+                  control={form.control}
+                  name="is_available"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                      <div className="space-y-0.5">
+                        <FormLabel>Available</FormLabel>
+                        <FormDescription>
+                          Determine if the dish is available for order.
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <Button type="submit" disabled={isLoading}>
+                {initialData ? "Update Dish" : "Create Dish"}
+              </Button>
+            </form>
+          </Form>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 
