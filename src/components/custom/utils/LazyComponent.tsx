@@ -36,11 +36,11 @@ const DynamicPageLoader = ({ pageKey }: DynamicPageLoaderProps) => {
     'DishDetail': () => import('@/pages/dishDetail/DishDetail'),
 
     // Pages d'authentification
-    'Login': () => import('@/pages/auth/Login'),
-    'Register': () => import('@/pages/auth/Register'),
-    'ForgotPassword': () => import('@/pages/auth/ForgotPassword'),
-    'ChangePassword': () => import('@/pages/auth/ChangePassword'),
-    'VerifyOTP': () => import('@/pages/auth/VerifyOTP'),
+    'auth/Login': () => import('@/pages/auth/Login'),
+    'auth/Register': () => import('@/pages/auth/Register'),
+    'auth/ForgotPassword': () => import('@/pages/auth/ForgotPassword'),
+    'auth/ChangePassword': () => import('@/pages/auth/ChangePassword'),
+    'auth/VerifyOTP': () => import('@/pages/auth/VerifyOTP'),
 
     // Pages de profil
     'Profile': () => import('@/pages/profile/Profile'),

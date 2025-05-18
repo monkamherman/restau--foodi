@@ -8,15 +8,15 @@ const profileRoutes = {
   element: <Outlet />,
   children: [
     {
-      path: '/profile',
+      path: '/account',
       element: (
         <PrivateRoute>
-          <DynamicPageLoader pageKey="profile/Profile" />
+          <DynamicPageLoader pageKey="account/UserAccount" />
         </PrivateRoute>
       ),
     },
     {
-      path: '/profile/settings',
+      path: '/account/profile',
       element: (
         <PrivateRoute>
           <DynamicPageLoader pageKey="profile/UserProfile" />
@@ -24,7 +24,7 @@ const profileRoutes = {
       ),
     },
     {
-      path: '/profile/security',
+      path: '/account/security',
       element: (
         <PrivateRoute>
           <DynamicPageLoader pageKey="profile/components/SecuritySettings" />
