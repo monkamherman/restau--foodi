@@ -8,6 +8,9 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    headers: {
+      'Content-Security-Policy': "'self' 'unsafe-eval' 'unsafe-inline'"
+    }
   },
   plugins: [
     react(),
@@ -17,6 +20,11 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "@/pages": path.resolve(__dirname, "./src/pages"),
     },
+    dedupe: ['react'],
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react-router-dom', '@tanstack/react-query'],
   },
 }));
