@@ -18,36 +18,6 @@ import CouponsManagement from '@/pages/dashboard/pages/Coupons';
 
 const Router = createBrowserRouter([
   {
-    path: 'dashboard',
-    element: <Dashboard />,
-    children: [
-      {
-        path: '',
-        element: <DashboardHome />,
-      },
-      {
-        path: 'dishes',
-        element: <DynamicPageLoader pageKey="admin/dishes/DishesManagement" />,
-      },
-      {
-        path: 'orders',
-        element: <OrdersManagement />,
-      },
-      {
-        path: 'users',
-        element: <UsersManagement />,
-      },
-      {
-        path: 'reviews',
-        element: <DynamicPageLoader pageKey="admin/components/ReviewsManagement" />,
-      },
-      {
-        path: 'coupons',
-        element: <CouponsManagement />,
-      },
-    ],
-  },
-  {
     path: '',
     element: (
       <AuthProvider>
@@ -60,6 +30,40 @@ const Router = createBrowserRouter([
     errorElement: <DynamicPageLoader pageKey="error/PageError" />,
 
     children: [
+      {
+        path: 'dashboard',
+        element: (
+          <PrivateRoute>
+            <Dashboard />
+          </PrivateRoute>
+        ),
+        children: [
+          {
+            path: '',
+            element: <DashboardHome />,
+          },
+          {
+            path: 'dishes',
+            element: <DynamicPageLoader pageKey="admin/dishes/DishesManagement" />,
+          },
+          {
+            path: 'orders',
+            element: <OrdersManagement />,
+          },
+          {
+            path: 'users',
+            element: <UsersManagement />,
+          },
+          {
+            path: 'reviews',
+            element: <DynamicPageLoader pageKey="admin/components/ReviewsManagement" />,
+          },
+          {
+            path: 'coupons',
+            element: <CouponsManagement />,
+          },
+        ],
+      },
       {
         path: '/',
         element: (

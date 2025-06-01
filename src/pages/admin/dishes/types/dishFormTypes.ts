@@ -11,7 +11,7 @@ export interface DishFormData {
   ingredients: string[];
 }
 
-export const dishSchema = yup.object<DishFormData>().shape({
+export const dishSchema = yup.object({
   name: yup.string().required("Name is required"),
   description: yup.string().required("Description is required"),
   price: yup.number().positive("Price must be positive").required("Price is required"),

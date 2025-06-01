@@ -7,14 +7,14 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface Order {
   id: string;
-  user_id: string;
+  user_id: string | null;
   total_amount: number;
   status: string;
   created_at: string;
-  profiles?: {
-    first_name: string;
-    last_name: string;
-  } | null;
+  coupon_code?: string;
+  discount_amount?: number;
+  final_amount: number;
+  updated_at: string;
 }
 
 const OrdersManagement = () => {
@@ -26,28 +26,13 @@ const OrdersManagement = () => {
       try {
         const { data, error } = await supabase
           .from('orders')
-          .select(`
-            *,
-            profiles!orders_user_id_fkey(first_name, last_name)
-          `)
+          .select('*')
           .order('created_at', { ascending: false });
 
         if (error) throw error;
         setOrders(data || []);
       } catch (error) {
         console.error('Error fetching orders:', error);
-        // Fallback: fetch orders without profiles if the join fails
-        try {
-          const { data: fallbackData, error: fallbackError } = await supabase
-            .from('orders')
-            .select('*')
-            .order('created_at', { ascending: false });
-          
-          if (fallbackError) throw fallbackError;
-          setOrders(fallbackData || []);
-        } catch (fallbackError) {
-          console.error('Fallback fetch also failed:', fallbackError);
-        }
       } finally {
         setIsLoading(false);
       }
@@ -89,7 +74,7 @@ const OrdersManagement = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>ID</TableHead>
-                  <TableHead>Client</TableHead>
+                  <TableHead>Utilisateur</TableHead>
                   <TableHead>Montant</TableHead>
                   <TableHead>Statut</TableHead>
                   <TableHead>Date</TableHead>
@@ -102,12 +87,9 @@ const OrdersManagement = () => {
                       {order.id.substring(0, 8)}...
                     </TableCell>
                     <TableCell>
-                      {order.profiles ? 
-                        `${order.profiles.first_name} ${order.profiles.last_name}` : 
-                        'Client anonyme'
-                      }
+                      {order.user_id ? order.user_id.substring(0, 8) + '...' : 'Client anonyme'}
                     </TableCell>
-                    <TableCell>{order.total_amount}€</TableCell>
+                    <TableCell>{order.final_amount}€</TableCell>
                     <TableCell>
                       <Badge className={getStatusColor(order.status)}>
                         {order.status}
