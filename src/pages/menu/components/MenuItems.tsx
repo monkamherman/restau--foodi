@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
-const categories = ["All", "Entrées", "Plats Principaux", "Desserts", "Boissons", "Spécialités"];
+const categories = ["Tous", "Entrées", "Plats Principaux", "Desserts", "Boissons", "Spécialités"];
 
 const menuItems = [
   {
@@ -13,7 +13,8 @@ const menuItems = [
     description: "Feuilles de ndolè mijotées avec de la pâte d'arachide, servies avec des crevettes et du poisson fumé",
     price: 5000,
     category: "Plats Principaux",
-    image: "https://images.unsplash.com/photo-1562888871-a4fd23bea597?q=80&w=1587&auto=format&fit=crop"
+    image: "https://images.unsplash.com/photo-1562888871-a4fd23bea597?q=80&w=1587&auto=format&fit=crop",
+    delivery_options: ["à emporter", "à livrer"]
   },
   {
     id: 2,
@@ -21,7 +22,8 @@ const menuItems = [
     description: "Beignets de poisson épicés, légers et croustillants",
     price: 2500,
     category: "Entrées",
-    image: "https://images.unsplash.com/photo-1635146037526-e3f4b5ade6eb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1587&q=80"
+    image: "https://images.unsplash.com/photo-1635146037526-e3f4b5ade6eb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1587&q=80",
+    delivery_options: ["à emporter", "à livrer"]
   },
   {
     id: 3,
@@ -29,7 +31,8 @@ const menuItems = [
     description: "Poulet braisé avec bananes plantains, légumes et sauce épicée",
     price: 6500,
     category: "Spécialités",
-    image: "https://images.unsplash.com/photo-1562967915-92ae0c320a01?q=80&w=1587&auto=format&fit=crop"
+    image: "https://images.unsplash.com/photo-1562967915-92ae0c320a01?q=80&w=1587&auto=format&fit=crop",
+    delivery_options: ["à emporter", "à livrer"]
   },
   {
     id: 4,
@@ -37,7 +40,8 @@ const menuItems = [
     description: "Feuilles de melon sauvage cuisinées avec de la viande fumée, du poisson séché et de l'huile de palme",
     price: 4800,
     category: "Plats Principaux",
-    image: "https://images.unsplash.com/photo-1625393355676-f473ef7d1e62?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1587&q=80"
+    image: "https://images.unsplash.com/photo-1625393355676-f473ef7d1e62?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1587&q=80",
+    delivery_options: ["à emporter", "à livrer"]
   },
   {
     id: 5,
@@ -45,7 +49,8 @@ const menuItems = [
     description: "Beignets traditionnels légers et moelleux, saupoudrés de sucre",
     price: 1500,
     category: "Desserts",
-    image: "https://images.unsplash.com/photo-1606313564200-e75d8e3ddc74?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1587&q=80"
+    image: "https://images.unsplash.com/photo-1606313564200-e75d8e3ddc74?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1587&q=80",
+    delivery_options: ["à emporter", "à livrer"]
   },
   {
     id: 6,
@@ -53,7 +58,8 @@ const menuItems = [
     description: "Boisson rafraîchissante au gingembre frais avec une touche de citron",
     price: 1200,
     category: "Boissons",
-    image: "https://images.unsplash.com/photo-1482349212652-744925892164?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1587&q=80"
+    image: "https://images.unsplash.com/photo-1482349212652-744925892164?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1587&q=80",
+    delivery_options: ["à emporter", "à livrer"]
   },
   {
     id: 7,
@@ -61,7 +67,8 @@ const menuItems = [
     description: "Gâteau traditionnel de haricots cuits à la vapeur dans des feuilles de bananier",
     price: 3000,
     category: "Entrées",
-    image: "https://images.unsplash.com/photo-1583467875263-d50dec37a88c?q=80&w=1587&auto=format&fit=crop"
+    image: "https://images.unsplash.com/photo-1583467875263-d50dec37a88c?q=80&w=1587&auto=format&fit=crop",
+    delivery_options: ["à emporter", "à livrer"]
   },
   {
     id: 8,
@@ -69,19 +76,38 @@ const menuItems = [
     description: "Maïs frais grillé servi avec des épices locales",
     price: 1000,
     category: "Entrées",
-    image: "https://images.unsplash.com/photo-1470119693884-47d3a1d1f180?q=80&w=1587&auto=format&fit=crop"
+    image: "https://images.unsplash.com/photo-1470119693884-47d3a1d1f180?q=80&w=1587&auto=format&fit=crop",
+    delivery_options: ["à emporter", "à livrer"]
+  },
+  {
+    id: 9,
+    name: "Fufu avec Sauce d'Arachide",
+    description: "Fufu traditionnel accompagné d'une riche sauce d'arachide avec viande ou poisson",
+    price: 4500,
+    category: "Plats Principaux",
+    image: "https://images.unsplash.com/photo-1546833998-877b37c2e5c6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1587&q=80",
+    delivery_options: ["à emporter", "à livrer"]
+  },
+  {
+    id: 10,
+    name: "Bissap",
+    description: "Boisson traditionnelle à base de fleurs d'hibiscus, rafraîchissante et parfumée",
+    price: 800,
+    category: "Boissons",
+    image: "https://images.unsplash.com/photo-1544145945-f90425340c7e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1587&q=80",
+    delivery_options: ["à emporter", "à livrer"]
   }
 ];
 
 const MenuItems = () => {
-  const [activeCategory, setActiveCategory] = useState("All");
+  const [activeCategory, setActiveCategory] = useState("Tous");
 
-  const filteredItems = activeCategory === "All" 
+  const filteredItems = activeCategory === "Tous" 
     ? menuItems 
     : menuItems.filter(item => item.category === activeCategory);
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XAF' }).format(price);
+    return new Intl.NumberFormat('fr-FR').format(price) + ' FCFA';
   };
 
   return (
@@ -133,14 +159,24 @@ const MenuItems = () => {
                   <span className="text-foodie-primary font-bold text-xl">{formatPrice(item.price)}</span>
                 </div>
                 <p className="text-foodie-text-light text-sm mb-4">{item.description}</p>
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center mb-4">
                   <span className="text-foodie-primary text-xs uppercase tracking-wider">
                     {item.category}
                   </span>
-                  <Button variant="outline" size="sm" asChild>
-                    <Link to={`/dish/${item.id}`}>Détails</Link>
-                  </Button>
                 </div>
+                <div className="mb-4">
+                  <p className="text-sm font-medium text-gray-700 mb-2">Options de commande:</p>
+                  <div className="flex gap-2">
+                    {item.delivery_options.map((option, index) => (
+                      <span key={index} className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                        {option}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <Button variant="outline" size="sm" className="w-full" asChild>
+                  <Link to={`/dish/${item.id}`}>Commander</Link>
+                </Button>
               </div>
             </div>
           ))}

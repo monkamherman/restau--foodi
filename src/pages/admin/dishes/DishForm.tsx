@@ -14,7 +14,7 @@ const DishForm = ({ initialData, onSubmit }: DishFormProps) => {
 
   const form = useForm<DishFormData>({
     resolver: yupResolver(dishSchema),
-    defaultValues: initialData || {
+    defaultValues: {
       name: "",
       description: "",
       price: 0,
@@ -22,12 +22,22 @@ const DishForm = ({ initialData, onSubmit }: DishFormProps) => {
       image_url: "",
       is_available: true,
       ingredients: [],
+      ...initialData,
     },
   });
 
   useEffect(() => {
     if (initialData) {
-      form.reset(initialData);
+      form.reset({
+        name: "",
+        description: "",
+        price: 0,
+        category: "",
+        image_url: "",
+        is_available: true,
+        ingredients: [],
+        ...initialData,
+      });
     }
   }, [initialData, form]);
 
@@ -38,7 +48,7 @@ const DishForm = ({ initialData, onSubmit }: DishFormProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{initialData ? "Edit Dish" : "Create New Dish"}</CardTitle>
+        <CardTitle>{initialData ? "Modifier le Plat" : "Créer un Nouveau Plat"}</CardTitle>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -54,7 +64,7 @@ const DishForm = ({ initialData, onSubmit }: DishFormProps) => {
               <DishFormFields form={form} />
               
               <Button type="submit" disabled={isLoading}>
-                {initialData ? "Update Dish" : "Create Dish"}
+                {initialData ? "Mettre à Jour le Plat" : "Créer le Plat"}
               </Button>
             </form>
           </Form>

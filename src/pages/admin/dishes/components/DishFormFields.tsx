@@ -28,9 +28,9 @@ const DishFormFields = ({ form }: DishFormFieldsProps) => {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Dish Name</FormLabel>
+              <FormLabel>Nom du Plat</FormLabel>
               <FormControl>
-                <Input placeholder="Enter dish name" {...field} />
+                <Input placeholder="Entrez le nom du plat" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -42,20 +42,19 @@ const DishFormFields = ({ form }: DishFormFieldsProps) => {
           name="category"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Category</FormLabel>
+              <FormLabel>Catégorie</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a category" />
+                    <SelectValue placeholder="Sélectionnez une catégorie" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="pizza">Pizza</SelectItem>
-                  <SelectItem value="burger">Burger</SelectItem>
-                  <SelectItem value="sushi">Sushi</SelectItem>
-                  <SelectItem value="pasta">Pasta</SelectItem>
-                  <SelectItem value="salad">Salad</SelectItem>
-                  <SelectItem value="dessert">Dessert</SelectItem>
+                  <SelectItem value="Entrées">Entrées</SelectItem>
+                  <SelectItem value="Plats Principaux">Plats Principaux</SelectItem>
+                  <SelectItem value="Desserts">Desserts</SelectItem>
+                  <SelectItem value="Boissons">Boissons</SelectItem>
+                  <SelectItem value="Spécialités">Spécialités</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -72,7 +71,7 @@ const DishFormFields = ({ form }: DishFormFieldsProps) => {
             <FormLabel>Description</FormLabel>
             <FormControl>
               <Textarea
-                placeholder="Enter dish description"
+                placeholder="Entrez la description du plat"
                 className="resize-none"
                 {...field}
               />
@@ -87,11 +86,11 @@ const DishFormFields = ({ form }: DishFormFieldsProps) => {
         name="price"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Price</FormLabel>
+            <FormLabel>Prix (FCFA)</FormLabel>
             <FormControl>
               <Input 
                 type="number" 
-                placeholder="Enter price" 
+                placeholder="Entrez le prix en francs CFA" 
                 {...field}
                 onChange={(e) => field.onChange(parseFloat(e.target.value))} 
               />
@@ -107,10 +106,10 @@ const DishFormFields = ({ form }: DishFormFieldsProps) => {
           name="image_url"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Image URL</FormLabel>
+              <FormLabel>URL de l'Image</FormLabel>
               <FormControl>
                 <div className="flex items-center space-x-4">
-                  <Input placeholder="Enter image URL" {...field} />
+                  <Input placeholder="Entrez l'URL de l'image" {...field} />
                 </div>
               </FormControl>
               <FormMessage />
@@ -128,9 +127,9 @@ const DishFormFields = ({ form }: DishFormFieldsProps) => {
           render={({ field }) => (
             <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
               <div className="space-y-0.5">
-                <FormLabel>Available</FormLabel>
+                <FormLabel>Disponible</FormLabel>
                 <FormDescription>
-                  Determine if the dish is available for order.
+                  Déterminez si le plat est disponible à la commande.
                 </FormDescription>
               </div>
               <FormControl>
