@@ -9,8 +9,20 @@ import Footer from '@/components/Footer';
 // Routes configuration
 import authRoutes from './routes-config/authRoutes';
 import profileRoutes from './routes-config/profileRoutes';
+import Dashboard from '@/pages/dashboard/Dashboard';
+import DashboardHome from '@/pages/dashboard/pages/Home';
 
 const Router = createBrowserRouter([
+  {
+    path: 'dashboard',
+    element: <Dashboard />,
+    children: [
+      {
+        path: '',
+        element: <DashboardHome />,
+      }
+    ],
+  },
   {
     path: '',
     element: (

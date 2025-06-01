@@ -80,7 +80,7 @@ const Cart = () => {
                       
                       <div className="ml-4 flex-grow">
                         <h3 className="font-medium">{item.name}</h3>
-                        <p className="text-foodie-primary font-medium">${item.price.toFixed(2)}</p>
+                        {/* <p className="text-foodie-primary font-medium">${item.price.toFixed(2)}</p> */}
                       </div>
                       
                       <div className="flex items-center">
