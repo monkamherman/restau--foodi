@@ -14,7 +14,7 @@ interface Order {
   profiles?: {
     first_name: string;
     last_name: string;
-  };
+  } | null;
 }
 
 const OrdersManagement = () => {
@@ -28,7 +28,7 @@ const OrdersManagement = () => {
           .from('orders')
           .select(`
             *,
-            profiles:user_id(first_name, last_name)
+            profiles!orders_user_id_fkey(first_name, last_name)
           `)
           .order('created_at', { ascending: false });
 
@@ -36,6 +36,18 @@ const OrdersManagement = () => {
         setOrders(data || []);
       } catch (error) {
         console.error('Error fetching orders:', error);
+        // Fallback: fetch orders without profiles if the join fails
+        try {
+          const { data: fallbackData, error: fallbackError } = await supabase
+            .from('orders')
+            .select('*')
+            .order('created_at', { ascending: false });
+          
+          if (fallbackError) throw fallbackError;
+          setOrders(fallbackData || []);
+        } catch (fallbackError) {
+          console.error('Fallback fetch also failed:', fallbackError);
+        }
       } finally {
         setIsLoading(false);
       }
