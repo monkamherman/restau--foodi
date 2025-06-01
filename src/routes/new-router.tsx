@@ -15,6 +15,8 @@ import DashboardHome from '@/pages/dashboard/pages/Home';
 import OrdersManagement from '@/pages/dashboard/pages/Orders';
 import UsersManagement from '@/pages/dashboard/pages/Users';
 import CouponsManagement from '@/pages/dashboard/pages/Coupons';
+import DishesManagement from '@/pages/admin/dishes/DishesManagement';
+import ReviewsManagement from '@/pages/admin/components/ReviewsManagement';
 
 const Router = createBrowserRouter([
   {
@@ -44,7 +46,7 @@ const Router = createBrowserRouter([
           },
           {
             path: 'dishes',
-            element: <DynamicPageLoader pageKey="admin/dishes/DishesManagement" />,
+            element: <DishesManagement />,
           },
           {
             path: 'orders',
@@ -56,7 +58,7 @@ const Router = createBrowserRouter([
           },
           {
             path: 'reviews',
-            element: <DynamicPageLoader pageKey="admin/components/ReviewsManagement" />,
+            element: <ReviewsManagement />,
           },
           {
             path: 'coupons',
@@ -100,8 +102,8 @@ const Router = createBrowserRouter([
             element: <DynamicPageLoader pageKey="admin/components/AdminLayout" />,
             children: [
               { path: '', element: <DynamicPageLoader pageKey="admin/Dashboard" /> },
-              { path: 'dishes', element: <DynamicPageLoader pageKey="admin/dishes/DishesManagement" /> },
-              { path: 'reviews', element: <DynamicPageLoader pageKey="admin/components/ReviewsManagement" /> },
+              { path: 'dishes', element: <DishesManagement /> },
+              { path: 'reviews', element: <ReviewsManagement /> },
             ],
           },
 
