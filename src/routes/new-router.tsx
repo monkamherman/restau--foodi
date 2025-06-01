@@ -1,3 +1,4 @@
+
 import { createBrowserRouter, Outlet } from 'react-router-dom';
 import  ScrollToTop  from '@/components/custom/utils/ScrollToTop';
 import { AuthProvider } from '@/hooks/auth';
@@ -11,6 +12,9 @@ import authRoutes from './routes-config/authRoutes';
 import profileRoutes from './routes-config/profileRoutes';
 import Dashboard from '@/pages/dashboard/Dashboard';
 import DashboardHome from '@/pages/dashboard/pages/Home';
+import OrdersManagement from '@/pages/dashboard/pages/Orders';
+import UsersManagement from '@/pages/dashboard/pages/Users';
+import CouponsManagement from '@/pages/dashboard/pages/Coupons';
 
 const Router = createBrowserRouter([
   {
@@ -20,7 +24,27 @@ const Router = createBrowserRouter([
       {
         path: '',
         element: <DashboardHome />,
-      }
+      },
+      {
+        path: 'dishes',
+        element: <DynamicPageLoader pageKey="admin/dishes/DishesManagement" />,
+      },
+      {
+        path: 'orders',
+        element: <OrdersManagement />,
+      },
+      {
+        path: 'users',
+        element: <UsersManagement />,
+      },
+      {
+        path: 'reviews',
+        element: <DynamicPageLoader pageKey="admin/components/ReviewsManagement" />,
+      },
+      {
+        path: 'coupons',
+        element: <CouponsManagement />,
+      },
     ],
   },
   {
@@ -48,20 +72,20 @@ const Router = createBrowserRouter([
           </>
         ),
         children: [
-          { path: '/', element: <DynamicPageLoader pageKey="Home" /> },
-          { path: '/menu', element: <DynamicPageLoader pageKey="Menu" /> },
-          { path: '/delivery', element: <DynamicPageLoader pageKey="Delivery" /> },
-          { path: '/gallery', element: <DynamicPageLoader pageKey="Gallery" /> },
-          { path: '/cart', element: <DynamicPageLoader pageKey="Cart" /> },
-          { path: '/blog', element: <DynamicPageLoader pageKey="Blog" /> },
-          { path: '/about-us', element: <DynamicPageLoader pageKey="AboutUs" /> },
+          { path: '/', element: <DynamicPageLoader pageKey="home/Home" /> },
+          { path: '/menu', element: <DynamicPageLoader pageKey="menu/Menu" /> },
+          { path: '/delivery', element: <DynamicPageLoader pageKey="delivery/Delivery" /> },
+          { path: '/gallery', element: <DynamicPageLoader pageKey="gallery/Gallery" /> },
+          { path: '/cart', element: <DynamicPageLoader pageKey="cart/Cart" /> },
+          { path: '/blog', element: <DynamicPageLoader pageKey="blog/Blog" /> },
+          { path: '/about-us', element: <DynamicPageLoader pageKey="aboutUs/AboutUs" /> },
 
           // Private route
           {
             path: '/account',
             element: (
               <PrivateRoute>
-                <DynamicPageLoader pageKey="UserAccount" />
+                <DynamicPageLoader pageKey="account/UserAccount" />
               </PrivateRoute>
             ),
           },
@@ -69,11 +93,11 @@ const Router = createBrowserRouter([
           // Admin routes
           {
             path: '/admin',
-            element: <DynamicPageLoader pageKey="AdminLayout" />,
+            element: <DynamicPageLoader pageKey="admin/components/AdminLayout" />,
             children: [
-              { path: '', element: <DynamicPageLoader pageKey="Dashboard" /> },
-              { path: 'dishes', element: <DynamicPageLoader pageKey="DishesManagement" /> },
-              { path: 'reviews', element: <DynamicPageLoader pageKey="ReviewsManagement" /> },
+              { path: '', element: <DynamicPageLoader pageKey="admin/Dashboard" /> },
+              { path: 'dishes', element: <DynamicPageLoader pageKey="admin/dishes/DishesManagement" /> },
+              { path: 'reviews', element: <DynamicPageLoader pageKey="admin/components/ReviewsManagement" /> },
             ],
           },
 
