@@ -2,10 +2,9 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Star, Trash2, User, CheckCircle } from "lucide-react";
+import { Star, Trash2, User } from "lucide-react";
 
 interface Review {
   id: string;
@@ -14,10 +13,6 @@ interface Review {
   created_at: string;
   user_id: string;
   dish_id: string;
-  profiles?: {
-    first_name?: string;
-    last_name?: string;
-  };
 }
 
 const ReviewsManagement = () => {
@@ -34,13 +29,7 @@ const ReviewsManagement = () => {
       setIsLoading(true);
       const { data, error } = await supabase
         .from('reviews')
-        .select(`
-          *,
-          profiles (
-            first_name,
-            last_name
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -102,7 +91,7 @@ const ReviewsManagement = () => {
   if (isLoading) {
     return (
       <div className="p-8 text-center">
-        <div className="animate-spin h-10 w-10 border-4 border-foodie-primary border-t-transparent rounded-full mx-auto"></div>
+        <div className="animate-spin h-10 w-10 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
         <p className="mt-4">Loading reviews...</p>
       </div>
     );
@@ -128,16 +117,11 @@ const ReviewsManagement = () => {
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-foodie-primary rounded-full flex items-center justify-center">
+                    <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
                       <User size={20} className="text-white" />
                     </div>
                     <div>
-                      <CardTitle className="text-base">
-                        {review.profiles?.first_name && review.profiles?.last_name
-                          ? `${review.profiles.first_name} ${review.profiles.last_name}`
-                          : 'Anonymous User'
-                        }
-                      </CardTitle>
+                      <CardTitle className="text-base">Anonymous User</CardTitle>
                       <div className="flex items-center space-x-2 mt-1">
                         <div className="flex">
                           {renderStars(review.rating)}

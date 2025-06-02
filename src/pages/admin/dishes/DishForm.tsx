@@ -44,7 +44,12 @@ const DishForm = ({ initialData, onSubmit }: DishFormProps) => {
   }, [initialData, form]);
 
   const handleSubmit = async (data: DishFormData) => {
-    await onSubmit(data);
+    setIsLoading(true);
+    try {
+      await onSubmit(data);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
