@@ -6,7 +6,7 @@ import { supabase } from "./client";
  * @param role Le rôle à vérifier ('admin', 'user', etc.)
  * @returns Promise<boolean> Vrai si l'utilisateur a le rôle, faux sinon
  */
-export async function checkUserRole(role: string): Promise<boolean> {
+export async function checkUserRole(role: 'admin' | 'user' | 'super-admin'): Promise<boolean> {
   try {
     const { data, error } = await supabase
       .from('user_roles')

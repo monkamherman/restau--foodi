@@ -19,6 +19,8 @@ interface Review {
   comment: string | null;
   created_at: string;
   is_approved: boolean;
+  approved_by: string | null;
+  approved_at: string | null;
   user_id: string;
   profiles?: Profile | null;
 }
@@ -97,7 +99,9 @@ const ReviewsList = ({ dishId, refreshTrigger = 0 }: ReviewsListProps) => {
           rating: item.rating,
           comment: item.comment,
           created_at: item.created_at,
-          is_approved: item.is_approved,
+          is_approved: item.is_approved || false,
+          approved_by: item.approved_by || null,
+          approved_at: item.approved_at || null,
           user_id: item.user_id,
           profiles: profile
         };
@@ -154,7 +158,7 @@ const ReviewsList = ({ dishId, refreshTrigger = 0 }: ReviewsListProps) => {
       {/* User's pending reviews */}
       {pendingReviews.length > 0 && (
         <div className="mb-8">
-          <Alert variant="warning">
+          <Alert>
             <AlertTitle>Vos avis en attente d'approbation</AlertTitle>
             <AlertDescription>
               Vos avis ci-dessous sont en cours de modération et seront visibles par tous une fois approuvés.

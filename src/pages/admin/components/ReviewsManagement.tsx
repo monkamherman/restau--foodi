@@ -64,7 +64,7 @@ const ReviewsManagement = () => {
 
       if (error) throw error;
       
-      const formattedReviews = data.map(review => {
+      const formattedReviews: Review[] = data.map(review => {
         const profileData = review.profiles as unknown;
         let profile: Profile | undefined = undefined;
         
@@ -78,6 +78,9 @@ const ReviewsManagement = () => {
         
         return {
           ...review,
+          is_approved: review.is_approved || false,
+          approved_by: review.approved_by || null,
+          approved_at: review.approved_at || null,
           profile
         };
       });

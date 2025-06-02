@@ -17,7 +17,7 @@ export interface DishFormProps {
   onSubmit: (data: DishFormData) => Promise<void>;
 }
 
-export const dishSchema: yup.ObjectSchema<DishFormData> = yup.object({
+export const dishSchema = yup.object({
   name: yup.string().required("Le nom du plat est requis"),
   description: yup.string().required("La description est requise"),
   price: yup.number().min(0, "Le prix doit être positif").required("Le prix est requis"),
