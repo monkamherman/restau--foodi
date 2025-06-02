@@ -1,46 +1,28 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { 
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Star, Check, X, Clock } from "lucide-react";
-import { useAuth } from "@/hooks/auth";
-
-interface Profile {
-  id: string;
-  first_name: string | null;
-  last_name: string | null;
-  avatar_url: string | null;
-}
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Star, Trash2, User, CheckCircle } from "lucide-react";
 
 interface Review {
   id: string;
-  user_id: string;
-  dish_id: string | null;
+  comment: string;
   rating: number;
-  comment: string | null;
   created_at: string;
-  updated_at: string;
-  is_approved: boolean;
-  approved_by: string | null;
-  approved_at: string | null;
-  profile?: Profile;
+  user_id: string;
+  dish_id: string;
+  profiles?: {
+    first_name?: string;
+    last_name?: string;
+  };
 }
 
 const ReviewsManagement = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { user } = useAuth();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -49,88 +31,32 @@ const ReviewsManagement = () => {
 
   const fetchReviews = async () => {
     try {
+      setIsLoading(true);
       const { data, error } = await supabase
         .from('reviews')
         .select(`
           *,
-          profiles:user_id(
-            id,
+          profiles (
             first_name,
-            last_name,
-            avatar_url
+            last_name
           )
         `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      
-      const formattedReviews: Review[] = data.map(review => {
-        const profileData = review.profiles as unknown;
-        let profile: Profile | undefined = undefined;
-        
-        if (profileData && typeof profileData === 'object' &&
-            'id' in profileData &&
-            'first_name' in profileData &&
-            'last_name' in profileData &&
-            'avatar_url' in profileData) {
-          profile = profileData as Profile;
-        }
-        
-        return {
-          ...review,
-          is_approved: review.is_approved || false,
-          approved_by: review.approved_by || null,
-          approved_at: review.approved_at || null,
-          profile
-        };
-      });
-
-      setReviews(formattedReviews);
+      setReviews(data || []);
     } catch (error: any) {
-      console.error("Error fetching reviews:", error);
       toast({
         variant: "destructive",
-        title: "Erreur lors du chargement des avis",
-        description: error.message,
+        title: "Error fetching reviews",
+        description: error.message
       });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleApproveReview = async (reviewId: string) => {
-    try {
-      const { error } = await supabase
-        .from('reviews')
-        .update({
-          is_approved: true,
-          approved_by: user?.id,
-          approved_at: new Date().toISOString()
-        })
-        .eq('id', reviewId);
-
-      if (error) throw error;
-
-      setReviews(reviews.map(review => 
-        review.id === reviewId 
-          ? { ...review, is_approved: true, approved_by: user?.id, approved_at: new Date().toISOString() }
-          : review
-      ));
-
-      toast({
-        title: "Avis approuvé",
-        description: "L'avis est maintenant visible publiquement",
-      });
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Erreur lors de l'approbation",
-        description: error.message,
-      });
-    }
-  };
-
-  const handleRejectReview = async (reviewId: string) => {
+  const deleteReview = async (reviewId: string) => {
     try {
       const { error } = await supabase
         .from('reviews')
@@ -140,125 +66,110 @@ const ReviewsManagement = () => {
       if (error) throw error;
 
       setReviews(reviews.filter(review => review.id !== reviewId));
-
       toast({
-        title: "Avis rejeté",
-        description: "L'avis a été supprimé",
+        title: "Review deleted",
+        description: "The review has been successfully deleted"
       });
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Erreur lors du rejet",
-        description: error.message,
+        title: "Error deleting review",
+        description: error.message
       });
     }
   };
 
-  const renderRatingStars = (rating: number) => {
-    return Array(5)
-      .fill(0)
-      .map((_, i) => (
-        <Star
-          key={i}
-          size={16}
-          className={i < rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}
-        />
-      ));
+  const renderStars = (rating: number) => {
+    return Array.from({ length: 5 }, (_, i) => (
+      <Star
+        key={i}
+        size={16}
+        className={i < rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}
+      />
+    ));
   };
 
-  const getStatusBadge = (review: Review) => {
-    if (review.is_approved) {
-      return <Badge variant="default" className="bg-green-100 text-green-800"><Check size={12} className="mr-1" />Approuvé</Badge>;
-    }
-    return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800"><Clock size={12} className="mr-1" />En attente</Badge>;
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('fr-FR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
+
+  if (isLoading) {
+    return (
+      <div className="p-8 text-center">
+        <div className="animate-spin h-10 w-10 border-4 border-foodie-primary border-t-transparent rounded-full mx-auto"></div>
+        <p className="mt-4">Loading reviews...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Gestion des Avis Clients</h1>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold">Reviews Management</h1>
+        <p className="text-muted-foreground">Manage customer reviews and ratings</p>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Tous les Avis</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="py-8 text-center">Chargement des avis...</div>
-          ) : reviews.length === 0 ? (
-            <div className="py-8 text-center text-muted-foreground">Aucun avis pour le moment</div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Note</TableHead>
-                  <TableHead>Commentaire</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {reviews.map((review) => (
-                  <TableRow key={review.id}>
-                    <TableCell>
-                      {review.profile ? (
-                        `${review.profile.first_name || ''} ${review.profile.last_name || ''}`.trim() || 'Anonyme'
-                      ) : (
-                        'Anonyme'
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center">
-                        {renderRatingStars(review.rating)}
-                      </div>
-                    </TableCell>
-                    <TableCell className="max-w-md">
-                      <div className="truncate">
-                        {review.comment || 'Pas de commentaire'}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {new Date(review.created_at).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      {getStatusBadge(review)}
-                    </TableCell>
-                    <TableCell>
-                      {!review.is_approved ? (
-                        <div className="flex space-x-2">
-                          <Button 
-                            size="sm" 
-                            className="bg-green-600 hover:bg-green-700"
-                            onClick={() => handleApproveReview(review.id)}
-                          >
-                            <Check size={16} className="mr-1" /> Approuver
-                          </Button>
-                          <Button 
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => handleRejectReview(review.id)}
-                          >
-                            <X size={16} className="mr-1" /> Rejeter
-                          </Button>
+      <div className="grid gap-4">
+        {reviews.length === 0 ? (
+          <Card>
+            <CardContent className="py-8 text-center">
+              <p className="text-muted-foreground">No reviews found</p>
+            </CardContent>
+          </Card>
+        ) : (
+          reviews.map((review) => (
+            <Card key={review.id}>
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-foodie-primary rounded-full flex items-center justify-center">
+                      <User size={20} className="text-white" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base">
+                        {review.profiles?.first_name && review.profiles?.last_name
+                          ? `${review.profiles.first_name} ${review.profiles.last_name}`
+                          : 'Anonymous User'
+                        }
+                      </CardTitle>
+                      <div className="flex items-center space-x-2 mt-1">
+                        <div className="flex">
+                          {renderStars(review.rating)}
                         </div>
-                      ) : (
-                        <Button 
-                          size="sm" 
-                          variant="destructive"
-                          onClick={() => handleRejectReview(review.id)}
-                        >
-                          <X size={16} className="mr-1" /> Supprimer
-                        </Button>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+                        <span className="text-sm text-muted-foreground">
+                          {formatDate(review.created_at)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => deleteReview(review.id)}
+                    >
+                      <Trash2 size={16} />
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-700 mb-3">{review.comment}</p>
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <span>Review ID: {review.id.substring(0, 8)}...</span>
+                  <span>Dish ID: {review.dish_id.substring(0, 8)}...</span>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
     </div>
   );
 };

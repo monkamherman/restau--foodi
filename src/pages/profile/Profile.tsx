@@ -6,9 +6,10 @@ import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import UserRoleBadge from "@/components/custom/UserRoleBadge";
 import { Badge } from "@/components/ui/badge";
+import { Settings, ShoppingCart, User, BarChart3 } from "lucide-react";
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, isAdmin, isSuperAdmin } = useAuth();
 
   if (!user) {
     return (
@@ -23,6 +24,7 @@ const Profile = () => {
   }
 
   const userInitials = user.email ? user.email[0].toUpperCase() : "U";
+  const hasAdminAccess = isAdmin || isSuperAdmin;
 
   return (
     <div className="container mx-auto mt-8 p-6">
@@ -73,41 +75,38 @@ const Profile = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
                   <Button variant="outline" asChild className="justify-start">
                     <Link to="/profile/settings">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-4 w-4">
-                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                      </svg>
+                      <User className="mr-2 h-4 w-4" />
                       Paramètres du profil
                     </Link>
                   </Button>
                   <Button variant="outline" asChild className="justify-start">
                     <Link to="/profile/security">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-4 w-4">
-                        <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                      </svg>
+                      <Settings className="mr-2 h-4 w-4" />
                       Sécurité &amp; Rôles
                     </Link>
                   </Button>
                   <Button variant="outline" asChild className="justify-start">
                     <Link to="/cart">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-4 w-4">
-                        <circle cx="8" cy="21" r="1"></circle>
-                        <circle cx="19" cy="21" r="1"></circle>
-                        <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
-                      </svg>
+                      <ShoppingCart className="mr-2 h-4 w-4" />
                       Mes commandes
                     </Link>
                   </Button>
                   <Button variant="outline" asChild className="justify-start">
                     <Link to="/account">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-4 w-4">
-                        <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
-                        <circle cx="12" cy="12" r="3"></circle>
-                      </svg>
+                      <Settings className="mr-2 h-4 w-4" />
                       Paramètres du compte
                     </Link>
                   </Button>
+                  
+                  {/* Dashboard access for admin users */}
+                  {hasAdminAccess && (
+                    <Button variant="default" asChild className="justify-start bg-foodie-primary hover:bg-foodie-primary/90">
+                      <Link to="/dashboard">
+                        <BarChart3 className="mr-2 h-4 w-4" />
+                        Accéder au Dashboard
+                      </Link>
+                    </Button>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -132,6 +131,15 @@ const Profile = () => {
                   <Badge variant="destructive" className="mr-2">super-admin</Badge>
                   <span>Super administrateur avec tous les droits, y compris la gestion des utilisateurs</span>
                 </div>
+                
+                {hasAdminAccess && (
+                  <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <p className="text-sm text-green-800 font-medium">
+                      🎉 Vous avez accès au dashboard d'administration ! 
+                      Cliquez sur le bouton "Accéder au Dashboard" ci-dessus pour gérer le restaurant.
+                    </p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
