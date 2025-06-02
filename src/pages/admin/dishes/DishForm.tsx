@@ -22,6 +22,7 @@ const DishForm = ({ initialData, onSubmit }: DishFormProps) => {
       image_url: "",
       is_available: true,
       ingredients: [],
+      delivery_options: ["à emporter", "à livrer"],
       ...initialData,
     },
   });
@@ -36,6 +37,7 @@ const DishForm = ({ initialData, onSubmit }: DishFormProps) => {
         image_url: "",
         is_available: true,
         ingredients: [],
+        delivery_options: ["à emporter", "à livrer"],
         ...initialData,
       });
     }

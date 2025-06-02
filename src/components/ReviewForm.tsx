@@ -26,8 +26,8 @@ const ReviewForm = ({ dishId, onSuccess }: ReviewFormProps) => {
     
     if (!user) {
       toast({
-        title: "Authentication required",
-        description: "You must be logged in to submit a review",
+        title: "Authentification requise",
+        description: "Vous devez être connecté pour laisser un avis",
         variant: "destructive"
       });
       return;
@@ -35,8 +35,17 @@ const ReviewForm = ({ dishId, onSuccess }: ReviewFormProps) => {
     
     if (rating === 0) {
       toast({
-        title: "Rating required",
-        description: "Please select a rating before submitting",
+        title: "Note requise",
+        description: "Veuillez sélectionner une note avant de soumettre",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (rating < 1 || rating > 5) {
+      toast({
+        title: "Note invalide",
+        description: "La note doit être comprise entre 1 et 5 étoiles",
         variant: "destructive"
       });
       return;
@@ -51,14 +60,15 @@ const ReviewForm = ({ dishId, onSuccess }: ReviewFormProps) => {
           dish_id: dishId,
           user_id: user.id,
           rating,
-          comment: comment.trim() || null
+          comment: comment.trim() || null,
+          is_approved: false // L'avis doit être approuvé par un admin
         });
       
       if (error) throw error;
       
       toast({
-        title: "Review submitted",
-        description: "Thank you for your feedback!"
+        title: "Avis soumis",
+        description: "Votre avis a été soumis et sera visible après validation par un administrateur"
       });
       
       setRating(0);
@@ -69,7 +79,7 @@ const ReviewForm = ({ dishId, onSuccess }: ReviewFormProps) => {
       }
     } catch (error: any) {
       toast({
-        title: "Error submitting review",
+        title: "Erreur lors de la soumission",
         description: error.message,
         variant: "destructive"
       });
@@ -80,11 +90,11 @@ const ReviewForm = ({ dishId, onSuccess }: ReviewFormProps) => {
 
   return (
     <div className="bg-white rounded-lg p-6 shadow-sm border">
-      <h3 className="text-lg font-medium mb-4">Leave a Review</h3>
+      <h3 className="text-lg font-medium mb-4">Laisser un Avis</h3>
       
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
-          <p className="text-sm font-medium mb-2">Your Rating</p>
+          <p className="text-sm font-medium mb-2">Votre Note (1-5 étoiles)</p>
           <div className="flex items-center">
             {[1, 2, 3, 4, 5].map((i) => (
               <button
@@ -107,18 +117,18 @@ const ReviewForm = ({ dishId, onSuccess }: ReviewFormProps) => {
               </button>
             ))}
             <span className="ml-2 text-sm text-muted-foreground">
-              {rating > 0 ? `${rating} out of 5` : "Select a rating"}
+              {rating > 0 ? `${rating} sur 5` : "Sélectionnez une note"}
             </span>
           </div>
         </div>
         
         <div className="mb-4">
           <label htmlFor="comment" className="text-sm font-medium block mb-2">
-            Your Review (Optional)
+            Votre Commentaire (Optionnel)
           </label>
           <Textarea
             id="comment"
-            placeholder="Tell us your thoughts about this dish..."
+            placeholder="Partagez votre expérience avec ce plat..."
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             className="w-full"
@@ -128,14 +138,14 @@ const ReviewForm = ({ dishId, onSuccess }: ReviewFormProps) => {
         <Button 
           type="submit" 
           className="w-full"
-          disabled={!user || rating === 0 || isSubmitting}
+          disabled={!user || rating === 0 || rating < 1 || rating > 5 || isSubmitting}
         >
-          {isSubmitting ? "Submitting..." : "Submit Review"}
+          {isSubmitting ? "Envoi en cours..." : "Soumettre l'Avis"}
         </Button>
         
         {!user && (
           <p className="text-sm text-muted-foreground mt-2 text-center">
-            Please log in to submit a review.
+            Veuillez vous connecter pour laisser un avis.
           </p>
         )}
       </form>
