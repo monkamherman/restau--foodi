@@ -1,4 +1,3 @@
-
 import { createBrowserRouter, Outlet } from 'react-router-dom';
 import  ScrollToTop  from '@/components/custom/utils/ScrollToTop';
 import { AuthProvider } from '@/hooks/auth';
@@ -15,6 +14,7 @@ import DashboardHome from '@/pages/dashboard/pages/Home';
 import OrdersManagement from '@/pages/dashboard/pages/Orders';
 import UsersManagement from '@/pages/dashboard/pages/Users';
 import CouponsManagement from '@/pages/dashboard/pages/Coupons';
+import DashboardSettings from '@/pages/dashboard/pages/Settings';
 import DishesManagement from '@/pages/admin/dishes/DishesManagement';
 import ReviewsManagement from '@/pages/admin/components/ReviewsManagement';
 
@@ -63,6 +63,10 @@ const Router = createBrowserRouter([
           {
             path: 'coupons',
             element: <CouponsManagement />,
+          },
+          {
+            path: 'settings',
+            element: <DashboardSettings />,
           },
         ],
       },
