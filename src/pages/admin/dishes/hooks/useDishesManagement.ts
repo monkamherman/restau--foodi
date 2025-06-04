@@ -15,6 +15,27 @@ export const useDishesManagement = () => {
 
   useEffect(() => {
     fetchDishes();
+    
+    // Configuration des mises à jour en temps réel
+    const channel = supabase
+      .channel('dishes-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'dishes'
+        },
+        () => {
+          console.log('Mise à jour en temps réel des plats détectée');
+          fetchDishes();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchDishes = async () => {
@@ -30,7 +51,7 @@ export const useDishesManagement = () => {
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Error fetching dishes",
+        title: "Erreur lors du chargement des plats",
         description: error.message,
       });
     } finally {
@@ -48,16 +69,15 @@ export const useDishesManagement = () => {
       if (error) throw error;
 
       toast({
-        title: "Dish added",
-        description: "The dish has been added successfully.",
+        title: "Plat ajouté",
+        description: "Le plat a été ajouté avec succès.",
       });
 
       setIsAddDialogOpen(false);
-      fetchDishes();
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Error adding dish",
+        title: "Erreur lors de l'ajout du plat",
         description: error.message,
       });
     }
@@ -75,16 +95,15 @@ export const useDishesManagement = () => {
       if (error) throw error;
 
       toast({
-        title: "Dish updated",
-        description: "The dish has been updated successfully.",
+        title: "Plat modifié",
+        description: "Le plat a été modifié avec succès.",
       });
 
       setIsEditDialogOpen(false);
-      fetchDishes();
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Error updating dish",
+        title: "Erreur lors de la modification du plat",
         description: error.message,
       });
     }
@@ -102,16 +121,15 @@ export const useDishesManagement = () => {
       if (error) throw error;
 
       toast({
-        title: "Dish deleted",
-        description: "The dish has been deleted successfully.",
+        title: "Plat supprimé",
+        description: "Le plat a été supprimé avec succès.",
       });
 
       setIsDeleteDialogOpen(false);
-      fetchDishes();
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Error deleting dish",
+        title: "Erreur lors de la suppression du plat",
         description: error.message,
       });
     }

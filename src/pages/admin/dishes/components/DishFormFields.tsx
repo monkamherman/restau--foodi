@@ -43,18 +43,18 @@ const DishFormFields = ({ form }: DishFormFieldsProps) => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Catégorie</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionnez une catégorie" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="Entrées">Entrées</SelectItem>
-                  <SelectItem value="Plats Principaux">Plats Principaux</SelectItem>
-                  <SelectItem value="Desserts">Desserts</SelectItem>
-                  <SelectItem value="Boissons">Boissons</SelectItem>
-                  <SelectItem value="Spécialités">Spécialités</SelectItem>
+                  <SelectItem value="entrees">Entrées</SelectItem>
+                  <SelectItem value="mains">Plats Principaux</SelectItem>
+                  <SelectItem value="desserts">Desserts</SelectItem>
+                  <SelectItem value="beverages">Boissons</SelectItem>
+                  <SelectItem value="specialties">Spécialités</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -86,11 +86,12 @@ const DishFormFields = ({ form }: DishFormFieldsProps) => {
         name="price"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Prix (FCFA)</FormLabel>
+            <FormLabel>Prix (€)</FormLabel>
             <FormControl>
               <Input 
                 type="number" 
-                placeholder="Entrez le prix en francs CFA" 
+                step="0.01"
+                placeholder="Entrez le prix en euros" 
                 {...field}
                 onChange={(e) => field.onChange(parseFloat(e.target.value))} 
               />

@@ -248,6 +248,51 @@ export type Database = {
         }
         Relationships: []
       }
+      reservations: {
+        Row: {
+          created_at: string
+          date: string
+          email: string
+          guests: number
+          id: string
+          name: string
+          phone: string
+          special_requests: string | null
+          status: string
+          time: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          email: string
+          guests: number
+          id?: string
+          name: string
+          phone: string
+          special_requests?: string | null
+          status?: string
+          time: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          email?: string
+          guests?: number
+          id?: string
+          name?: string
+          phone?: string
+          special_requests?: string | null
+          status?: string
+          time?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           comment: string | null
