@@ -8,8 +8,6 @@ export interface DishFormData {
   category: string;
   image_url: string;
   is_available: boolean;
-  ingredients: string[];
-  delivery_options: string[];
 }
 
 export interface DishFormProps {
@@ -26,6 +24,4 @@ export const dishSchema = yup.object().shape({
   category: yup.string().required("La catégorie est requise"),
   image_url: yup.string().url("URL invalide").required("L'URL de l'image est requise"),
   is_available: yup.boolean().required(),
-  ingredients: yup.array().of(yup.string()).min(1, "Au moins un ingrédient est requis"),
-  delivery_options: yup.array().of(yup.string()).min(1, "Au moins une option de livraison est requise")
 });

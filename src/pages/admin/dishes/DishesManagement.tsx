@@ -50,8 +50,13 @@ interface Dish {
 }
 
 // Définition des types requis pour le formulaire
-type DishFormData = Omit<Dish, 'id' | 'created_at'> & {
-  id?: string;
+type DishFormData = {
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  image_url: string;
+  is_available: boolean;
 };
 
 const DishesManagement = () => {
@@ -297,7 +302,15 @@ const DishesManagement = () => {
           </DialogHeader>
           {selectedDish && (
             <DishForm 
-              initialData={selectedDish}
+              initialData={{
+                id: selectedDish.id,
+                name: selectedDish.name,
+                description: selectedDish.description || "",
+                price: selectedDish.price,
+                category: selectedDish.category,
+                image_url: selectedDish.image_url || "",
+                is_available: selectedDish.is_available
+              }}
               onSubmit={handleEditDish} 
             />
           )}
