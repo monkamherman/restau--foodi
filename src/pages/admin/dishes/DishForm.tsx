@@ -15,26 +15,24 @@ const DishForm = ({ initialData, onSubmit }: DishFormProps) => {
   const form = useForm<DishFormData>({
     resolver: yupResolver(dishSchema),
     defaultValues: {
-      name: "",
-      description: "",
-      price: 0,
-      category: "",
-      image_url: "",
-      is_available: true,
-      ...initialData,
+      name: initialData?.name || "",
+      description: initialData?.description || "",
+      price: initialData?.price || 0,
+      category: initialData?.category || "",
+      image_url: initialData?.image_url || "",
+      is_available: initialData?.is_available ?? true,
     },
   });
 
   useEffect(() => {
     if (initialData) {
       form.reset({
-        name: "",
-        description: "",
-        price: 0,
-        category: "",
-        image_url: "",
-        is_available: true,
-        ...initialData,
+        name: initialData.name || "",
+        description: initialData.description || "",
+        price: initialData.price || 0,
+        category: initialData.category || "",
+        image_url: initialData.image_url || "",
+        is_available: initialData.is_available ?? true,
       });
     }
   }, [initialData, form]);
