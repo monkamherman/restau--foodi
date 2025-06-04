@@ -43,7 +43,7 @@ export const useReservations = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setReservations(data || []);
+      setReservations((data || []) as Reservation[]);
     } catch (error: any) {
       toast({
         variant: "destructive",

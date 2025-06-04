@@ -1,3 +1,4 @@
+
 import { createBrowserRouter, Outlet } from 'react-router-dom';
 import  ScrollToTop  from '@/components/custom/utils/ScrollToTop';
 import { AuthProvider } from '@/hooks/auth';
@@ -17,6 +18,7 @@ import CouponsManagement from '@/pages/dashboard/pages/Coupons';
 import DashboardSettings from '@/pages/dashboard/pages/Settings';
 import DishesManagement from '@/pages/admin/dishes/DishesManagement';
 import ReviewsManagement from '@/pages/admin/components/ReviewsManagement';
+import AdminReservations from '@/pages/admin/reservations/AdminReservations';
 
 const Router = createBrowserRouter([
   {
@@ -61,6 +63,10 @@ const Router = createBrowserRouter([
             element: <ReviewsManagement />,
           },
           {
+            path: 'reservations',
+            element: <AdminReservations />,
+          },
+          {
             path: 'coupons',
             element: <CouponsManagement />,
           },
@@ -89,6 +95,8 @@ const Router = createBrowserRouter([
           { path: '/cart', element: <DynamicPageLoader pageKey="cart/Cart" /> },
           { path: '/blog', element: <DynamicPageLoader pageKey="blog/Blog" /> },
           { path: '/about-us', element: <DynamicPageLoader pageKey="aboutUs/AboutUs" /> },
+          { path: '/reservations', element: <DynamicPageLoader pageKey="reservations/Reservations" /> },
+          { path: '/dish/:slug', element: <DynamicPageLoader pageKey="dishDetail/DishDetail" /> },
 
           // Private route
           {
@@ -108,6 +116,7 @@ const Router = createBrowserRouter([
               { path: '', element: <DynamicPageLoader pageKey="admin/Dashboard" /> },
               { path: 'dishes', element: <DishesManagement /> },
               { path: 'reviews', element: <ReviewsManagement /> },
+              { path: 'reservations', element: <AdminReservations /> },
             ],
           },
 

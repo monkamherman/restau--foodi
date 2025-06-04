@@ -1,73 +1,101 @@
 
-import { useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 import { 
-  LayoutDashboard, 
+  Home, 
   Utensils, 
-  Users, 
   ShoppingBag, 
+  Users, 
+  MessageSquare, 
+  Calendar,
   Tag, 
-  Star,
   Settings,
-  ChevronLeft,
-  ChevronRight
+  BarChart3
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-
-const sidebarItems = [
-  { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
-  { title: 'Plats', url: '/dashboard/dishes', icon: Utensils },
-  { title: 'Commandes', url: '/dashboard/orders', icon: ShoppingBag },
-  { title: 'Utilisateurs', url: '/dashboard/users', icon: Users },
-  { title: 'Avis', url: '/dashboard/reviews', icon: Star },
-  { title: 'Coupons', url: '/dashboard/coupons', icon: Tag },
-  { title: 'Paramètres', url: '/dashboard/settings', icon: Settings },
-];
 
 const DashboardSidebar = () => {
-  const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  
+  const menuItems = [
+    { 
+      title: 'Accueil', 
+      href: '/dashboard', 
+      icon: Home,
+      exact: true
+    },
+    { 
+      title: 'Statistiques', 
+      href: '/dashboard/stats', 
+      icon: BarChart3 
+    },
+    { 
+      title: 'Plats', 
+      href: '/dashboard/dishes', 
+      icon: Utensils 
+    },
+    { 
+      title: 'Commandes', 
+      href: '/dashboard/orders', 
+      icon: ShoppingBag 
+    },
+    { 
+      title: 'Réservations', 
+      href: '/dashboard/reservations', 
+      icon: Calendar 
+    },
+    { 
+      title: 'Utilisateurs', 
+      href: '/dashboard/users', 
+      icon: Users 
+    },
+    { 
+      title: 'Avis', 
+      href: '/dashboard/reviews', 
+      icon: MessageSquare 
+    },
+    { 
+      title: 'Coupons', 
+      href: '/dashboard/coupons', 
+      icon: Tag 
+    },
+    { 
+      title: 'Paramètres', 
+      href: '/dashboard/settings', 
+      icon: Settings 
+    },
+  ];
+
+  const isActive = (href: string, exact?: boolean) => {
+    if (exact) {
+      return location.pathname === href;
+    }
+    return location.pathname.startsWith(href);
+  };
 
   return (
-    <div className={`bg-white border-r border-gray-200 transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'}`}>
-      <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          {!collapsed && (
-            <h2 className="text-xl font-bold text-foodie-primary">Admin Panel</h2>
-          )}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setCollapsed(!collapsed)}
-            className="p-1"
-          >
-            {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-          </Button>
-        </div>
+    <div className="w-64 bg-white shadow-sm border-r min-h-screen">
+      <div className="p-6">
+        <h2 className="text-xl font-bold text-gray-800">Dashboard</h2>
       </div>
       
-      <nav className="p-4">
-        <ul className="space-y-2">
-          {sidebarItems.map((item) => {
-            const isActive = location.pathname === item.url;
-            return (
-              <li key={item.title}>
-                <NavLink
-                  to={item.url}
-                  className={`flex items-center p-3 rounded-lg transition-colors ${
-                    isActive
-                      ? 'bg-foodie-primary text-white'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  <item.icon size={20} />
-                  {!collapsed && (
-                    <span className="ml-3 font-medium">{item.title}</span>
-                  )}
-                </NavLink>
-              </li>
-            );
-          })}
+      <nav className="px-4 pb-4">
+        <ul className="space-y-1">
+          {menuItems.map((item) => (
+            <li key={item.href}>
+              <Link
+                to={item.href}
+                className={cn(
+                  "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors",
+                  isActive(item.href, item.exact)
+                    ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
+                    : "text-gray-700 hover:bg-gray-100"
+                )}
+              >
+                <item.icon className="mr-3 h-5 w-5" />
+                {item.title}
+              </Link>
+            </li>
+          ))}
         </ul>
       </nav>
     </div>

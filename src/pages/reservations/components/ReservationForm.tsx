@@ -1,68 +1,58 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-import { Calendar, Clock, Phone, Mail, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ReservationFormData } from "../types/reservationTypes";
+import { Calendar, Clock, Users, Phone, Mail, User } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import { useReservations } from "../hooks/useReservations";
-
-const reservationSchema = yup.object().shape({
-  name: yup.string().required("Le nom est requis"),
-  email: yup.string().email("Email invalide").required("L'email est requis"),
-  phone: yup.string().required("Le téléphone est requis"),
-  date: yup.string().required("La date est requise"),
-  time: yup.string().required("L'heure est requise"),
-  guests: yup.number().min(1, "Minimum 1 personne").max(12, "Maximum 12 personnes").required("Le nombre de personnes est requis"),
-  special_requests: yup.string(),
-});
+import { ReservationFormData, reservationSchema } from "../types/reservationTypes";
 
 const ReservationForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
   const { createReservation } = useReservations();
 
-  const form = useForm<ReservationFormData>({
-    resolver: yupResolver(reservationSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      phone: "",
-      date: "",
-      time: "",
-      guests: 2,
-      special_requests: "",
-    },
-  });
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    watch,
+    formState: { errors }
+  } = useForm<ReservationFormData>();
 
-  const handleSubmit = async (data: ReservationFormData) => {
-    setIsSubmitting(true);
+  const onSubmit = async (data: ReservationFormData) => {
     try {
+      setIsSubmitting(true);
       await createReservation(data);
-      form.reset();
+      reset();
+      toast({
+        title: "Réservation créée",
+        description: "Votre demande de réservation a été envoyée avec succès.",
+      });
     } catch (error) {
-      // L'erreur est gérée dans le hook
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de créer la réservation. Veuillez réessayer.",
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Générer les heures disponibles
-  const timeSlots = [];
-  for (let hour = 18; hour <= 22; hour++) {
-    for (let minute = 0; minute < 60; minute += 30) {
-      const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-      timeSlots.push(time);
-    }
-  }
+  const timeSlots = [
+    "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", 
+    "21:00", "21:30", "22:00", "22:30"
+  ];
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
+    <Card className="max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Calendar className="h-5 w-5" />
@@ -70,159 +60,141 @@ const ReservationForm = () => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nom complet</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Jean Dupont" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="name" className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                Nom complet *
+              </Label>
+              <Input
+                id="name"
+                {...register("name", reservationSchema.name)}
+                placeholder="Votre nom complet"
+                className={errors.name ? "border-red-500" : ""}
               />
-
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                        <Input className="pl-10" placeholder="jean@example.com" {...field} />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Téléphone</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                        <Input className="pl-10" placeholder="+33 1 23 45 67 89" {...field} />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="guests"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nombre de personnes</FormLabel>
-                    <Select onValueChange={(value) => field.onChange(parseInt(value))} defaultValue={field.value.toString()}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <div className="flex items-center gap-2">
-                            <Users className="h-4 w-4 text-gray-400" />
-                            <SelectValue />
-                          </div>
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {Array.from({ length: 12 }, (_, i) => i + 1).map((num) => (
-                          <SelectItem key={num} value={num.toString()}>
-                            {num} {num === 1 ? 'personne' : 'personnes'}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="date"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Date</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="date" 
-                        min={new Date().toISOString().split('T')[0]}
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="time"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Heure</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <div className="flex items-center gap-2">
-                            <Clock className="h-4 w-4 text-gray-400" />
-                            <SelectValue placeholder="Sélectionnez l'heure" />
-                          </div>
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {timeSlots.map((time) => (
-                          <SelectItem key={time} value={time}>
-                            {time}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <FormField
-              control={form.control}
-              name="special_requests"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Demandes spéciales (optionnel)</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Allergies, occasion spéciale, préférences de table..."
-                      className="resize-none"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+              {errors.name && (
+                <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
               )}
-            />
+            </div>
 
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Réservation en cours..." : "Confirmer la Réservation"}
-            </Button>
-          </form>
-        </Form>
+            <div>
+              <Label htmlFor="email" className="flex items-center gap-2">
+                <Mail className="h-4 w-4" />
+                Email *
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                {...register("email", reservationSchema.email)}
+                placeholder="votre@email.com"
+                className={errors.email ? "border-red-500" : ""}
+              />
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="phone" className="flex items-center gap-2">
+                <Phone className="h-4 w-4" />
+                Téléphone *
+              </Label>
+              <Input
+                id="phone"
+                {...register("phone", reservationSchema.phone)}
+                placeholder="+33 1 23 45 67 89"
+                className={errors.phone ? "border-red-500" : ""}
+              />
+              {errors.phone && (
+                <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="guests" className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Nombre de personnes *
+              </Label>
+              <Select onValueChange={(value) => setValue("guests", parseInt(value))}>
+                <SelectTrigger className={errors.guests ? "border-red-500" : ""}>
+                  <SelectValue placeholder="Choisir..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((num) => (
+                    <SelectItem key={num} value={num.toString()}>
+                      {num} personne{num > 1 ? "s" : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.guests && (
+                <p className="text-red-500 text-sm mt-1">{errors.guests.message}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="date" className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Date *
+              </Label>
+              <Input
+                id="date"
+                type="date"
+                {...register("date", reservationSchema.date)}
+                min={new Date().toISOString().split('T')[0]}
+                className={errors.date ? "border-red-500" : ""}
+              />
+              {errors.date && (
+                <p className="text-red-500 text-sm mt-1">{errors.date.message}</p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="time" className="flex items-center gap-2">
+                <Clock className="h-4 w-4" />
+                Heure *
+              </Label>
+              <Select onValueChange={(value) => setValue("time", value)}>
+                <SelectTrigger className={errors.time ? "border-red-500" : ""}>
+                  <SelectValue placeholder="Choisir l'heure" />
+                </SelectTrigger>
+                <SelectContent>
+                  {timeSlots.map((time) => (
+                    <SelectItem key={time} value={time}>
+                      {time}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.time && (
+                <p className="text-red-500 text-sm mt-1">{errors.time.message}</p>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="special_requests">Demandes spéciales</Label>
+            <Textarea
+              id="special_requests"
+              {...register("special_requests")}
+              placeholder="Allergies, occasions spéciales, préférences de table..."
+              className="min-h-[80px]"
+            />
+          </div>
+
+          <Button 
+            type="submit" 
+            className="w-full" 
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Envoi en cours..." : "Réserver la Table"}
+          </Button>
+        </form>
       </CardContent>
     </Card>
   );

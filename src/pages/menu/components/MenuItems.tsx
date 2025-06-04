@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Heart, ShoppingCart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -30,6 +31,7 @@ const MenuItems = () => {
   const [activeCategory, setActiveCategory] = useState("all");
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
   useEffect(() => {
@@ -90,6 +92,38 @@ const MenuItems = () => {
     }).format(price);
   };
 
+  const createSlug = (item: MenuItem) => {
+    const name = item.name.toLowerCase().replace(/\s+/g, '-');
+    const category = item.category.toLowerCase();
+    const origin = 'restaurant'; // Origine par défaut
+    return `${name}-${category}-${origin}`;
+  };
+
+  const toggleFavorite = (itemId: string) => {
+    const newFavorites = new Set(favorites);
+    if (newFavorites.has(itemId)) {
+      newFavorites.delete(itemId);
+      toast({
+        title: "Retiré des favoris",
+        description: "Le plat a été retiré de vos favoris."
+      });
+    } else {
+      newFavorites.add(itemId);
+      toast({
+        title: "Ajouté aux favoris",
+        description: "Le plat a été ajouté à vos favoris."
+      });
+    }
+    setFavorites(newFavorites);
+  };
+
+  const addToCart = (item: MenuItem) => {
+    toast({
+      title: "Ajouté au panier",
+      description: `${item.name} a été ajouté à votre panier.`
+    });
+  };
+
   if (isLoading) {
     return (
       <section id="menu" className="section-padding bg-white">
@@ -135,20 +169,29 @@ const MenuItems = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredItems.map((item) => (
-            <div key={item.id} className="bg-white shadow-md hover:shadow-lg transition-shadow">
-              <div className="h-60 overflow-hidden">
+            <div key={item.id} className="bg-white shadow-md hover:shadow-lg transition-shadow relative group">
+              <div className="h-60 overflow-hidden relative">
                 <img
                   src={item.image_url}
                   alt={item.name}
                   className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                 />
+                <button
+                  onClick={() => toggleFavorite(item.id)}
+                  className={cn(
+                    "absolute top-2 right-2 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center transition-colors",
+                    favorites.has(item.id) ? "text-red-500" : "text-gray-400 hover:text-red-500"
+                  )}
+                >
+                  <Heart size={16} className={favorites.has(item.id) ? "fill-current" : ""} />
+                </button>
               </div>
               <div className="p-6">
                 <div className="flex justify-between items-start mb-4">
                   <h3 className="font-bold text-xl">{item.name}</h3>
                   <span className="text-foodie-primary font-bold text-xl">{formatPrice(item.price)}</span>
                 </div>
-                <p className="text-foodie-text-light text-sm mb-4">{item.description}</p>
+                <p className="text-foodie-text-light text-sm mb-4 line-clamp-2">{item.description}</p>
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-foodie-primary text-xs uppercase tracking-wider">
                     {categories.find(cat => cat.id === item.category)?.label || item.category}
@@ -159,9 +202,18 @@ const MenuItems = () => {
                     </span>
                   )}
                 </div>
-                <Button variant="outline" size="sm" className="w-full" asChild>
-                  <Link to={`/dish/${item.id}`}>Commander</Link>
-                </Button>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" className="flex-1" asChild>
+                    <Link to={`/dish/${createSlug(item)}`}>Voir détails</Link>
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    className="px-3"
+                    onClick={() => addToCart(item)}
+                  >
+                    <ShoppingCart size={16} />
+                  </Button>
+                </div>
               </div>
             </div>
           ))}
