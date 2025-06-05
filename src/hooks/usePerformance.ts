@@ -3,9 +3,8 @@ import { useEffect, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
 interface PerformanceMetrics {
-  memory?: MemoryInfo;
-  connection?: NetworkInformation;
-  timing?: PerformanceTiming;
+  memory?: any;
+  connection?: any;
 }
 
 export const usePerformance = () => {
@@ -30,7 +29,6 @@ export const usePerformance = () => {
     const metrics: PerformanceMetrics = {
       memory: (performance as any).memory,
       connection: (navigator as any).connection,
-      timing: performance.timing,
     };
 
     // Si la mémoire est faible, nettoyer le cache plus agressivement

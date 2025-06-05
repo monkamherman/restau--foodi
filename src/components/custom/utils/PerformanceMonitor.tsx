@@ -14,7 +14,7 @@ interface PerformanceData {
 const PerformanceMonitor: React.FC<{ isVisible?: boolean }> = ({ 
   isVisible = process.env.NODE_ENV === 'development' 
 }) => {
-  const [performance, setPerformance] = useState<PerformanceData>({
+  const [performanceData, setPerformanceData] = useState<PerformanceData>({
     fps: 0,
     memory: 0,
     loadTime: 0,
@@ -35,14 +35,14 @@ const PerformanceMonitor: React.FC<{ isVisible?: boolean }> = ({
       if (currentTime - lastTime >= 1000) {
         const fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
         
-        setPerformance(prev => ({
+        setPerformanceData(prev => ({
           ...prev,
           fps,
           memory: (performance as any).memory?.usedJSHeapSize 
             ? Math.round((performance as any).memory.usedJSHeapSize / 1048576) 
             : 0,
-          loadTime: performance.timing 
-            ? performance.timing.loadEventEnd - performance.timing.navigationStart
+          loadTime: (performance as any).timing 
+            ? (performance as any).timing.loadEventEnd - (performance as any).timing.navigationStart
             : 0,
           connectionType: (navigator as any).connection?.effectiveType || 'unknown',
         }));
@@ -65,15 +65,15 @@ const PerformanceMonitor: React.FC<{ isVisible?: boolean }> = ({
 
   if (!isVisible) return null;
 
-  const getFPSColor = (fps: number) => {
-    if (fps >= 50) return 'success';
-    if (fps >= 30) return 'warning';
+  const getFPSColor = (fps: number): "default" | "destructive" | "secondary" | "outline" => {
+    if (fps >= 50) return 'default';
+    if (fps >= 30) return 'secondary';
     return 'destructive';
   };
 
-  const getMemoryColor = (memory: number) => {
-    if (memory < 50) return 'success';
-    if (memory < 100) return 'warning';
+  const getMemoryColor = (memory: number): "default" | "destructive" | "secondary" | "outline" => {
+    if (memory < 50) return 'default';
+    if (memory < 100) return 'secondary';
     return 'destructive';
   };
 
@@ -92,7 +92,7 @@ const PerformanceMonitor: React.FC<{ isVisible?: boolean }> = ({
               <Zap className="w-3 h-3 mr-1" />
               <span className="text-xs">FPS:</span>
             </div>
-            <Badge variant={getFPSColor(performance.fps)}>{performance.fps}</Badge>
+            <Badge variant={getFPSColor(performanceData.fps)}>{performanceData.fps}</Badge>
           </div>
           
           <div className="flex items-center justify-between">
@@ -100,8 +100,8 @@ const PerformanceMonitor: React.FC<{ isVisible?: boolean }> = ({
               <HardDrive className="w-3 h-3 mr-1" />
               <span className="text-xs">Memory:</span>
             </div>
-            <Badge variant={getMemoryColor(performance.memory)}>
-              {performance.memory}MB
+            <Badge variant={getMemoryColor(performanceData.memory)}>
+              {performanceData.memory}MB
             </Badge>
           </div>
           
@@ -110,13 +110,13 @@ const PerformanceMonitor: React.FC<{ isVisible?: boolean }> = ({
               <Wifi className="w-3 h-3 mr-1" />
               <span className="text-xs">Connection:</span>
             </div>
-            <Badge variant="outline">{performance.connectionType}</Badge>
+            <Badge variant="outline">{performanceData.connectionType}</Badge>
           </div>
           
-          {performance.loadTime > 0 && (
+          {performanceData.loadTime > 0 && (
             <div className="flex items-center justify-between">
               <span className="text-xs">Load Time:</span>
-              <Badge variant="outline">{Math.round(performance.loadTime)}ms</Badge>
+              <Badge variant="outline">{Math.round(performanceData.loadTime)}ms</Badge>
             </div>
           )}
         </CardContent>

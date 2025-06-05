@@ -9,6 +9,8 @@ import { RouterProvider } from "react-router-dom";
 import ScrollProgressBar from '@/components/custom/utils/ScrollProgress';
 import OfflineAlert from '@/components/custom/utils/OfflineAlert';
 import PerformanceMonitor from '@/components/custom/utils/PerformanceMonitor';
+import PWAInstallPrompt from '@/components/custom/utils/PWAInstallPrompt';
+import PWAUpdateNotification from '@/components/custom/utils/PWAUpdateNotification';
 
 // Configuration optimisée du QueryClient
 const queryClient = new QueryClient({
@@ -52,6 +54,8 @@ const App = () => (
         <Sonner />
         <OfflineAlert />
         <PerformanceMonitor />
+        <PWAInstallPrompt />
+        <PWAUpdateNotification />
       </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>

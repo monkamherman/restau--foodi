@@ -19,7 +19,7 @@ export const useOptimizedQuery = <T>(
     queryKey,
     queryFn: async () => {
       let query = supabase
-        .from(config.table)
+        .from(config.table as any)
         .select(config.select || '*');
 
       // Apply filters
@@ -75,7 +75,7 @@ export const useDashboardStats = () => {
   return useOptimizedQuery(
     ['dashboard-stats'],
     {
-      table: 'dishes', // On va optimiser cela plus tard
+      table: 'dishes',
       select: 'id',
     },
     {
