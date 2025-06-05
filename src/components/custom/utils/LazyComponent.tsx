@@ -10,6 +10,7 @@ const pageComponents = {
   'cart/Cart': lazy(() => import('@/pages/cart/Cart')),
   'blog/Blog': lazy(() => import('@/pages/blog/Blog')),
   'aboutUs/AboutUs': lazy(() => import('@/pages/aboutUs/AboutUs')),
+  'reservations/Reservations': lazy(() => import('@/pages/reservations/Reservations')),
   'account/UserAccount': lazy(() => import('@/pages/account/UserAccount')),
   'auth/Register': lazy(() => import('@/pages/auth/Register')),
   'auth/Login': lazy(() => import('@/pages/auth/Login')),
