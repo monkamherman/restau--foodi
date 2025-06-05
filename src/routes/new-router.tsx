@@ -12,13 +12,14 @@ import authRoutes from './routes-config/authRoutes';
 import profileRoutes from './routes-config/profileRoutes';
 import Dashboard from '@/pages/dashboard/Dashboard';
 import DashboardHome from '@/pages/dashboard/pages/Home';
+import Stats from '@/pages/dashboard/pages/Stats';
 import OrdersManagement from '@/pages/dashboard/pages/Orders';
 import UsersManagement from '@/pages/dashboard/pages/Users';
 import CouponsManagement from '@/pages/dashboard/pages/Coupons';
 import DashboardSettings from '@/pages/dashboard/pages/Settings';
+import Reviews from '@/pages/dashboard/pages/Reviews';
+import Reservations from '@/pages/dashboard/pages/Reservations';
 import DishesManagement from '@/pages/admin/dishes/DishesManagement';
-import ReviewsManagement from '@/pages/admin/components/ReviewsManagement';
-import AdminReservations from '@/pages/admin/reservations/AdminReservations';
 
 const Router = createBrowserRouter([
   {
@@ -47,6 +48,10 @@ const Router = createBrowserRouter([
             element: <DashboardHome />,
           },
           {
+            path: 'stats',
+            element: <Stats />,
+          },
+          {
             path: 'dishes',
             element: <DishesManagement />,
           },
@@ -60,11 +65,11 @@ const Router = createBrowserRouter([
           },
           {
             path: 'reviews',
-            element: <ReviewsManagement />,
+            element: <Reviews />,
           },
           {
             path: 'reservations',
-            element: <AdminReservations />,
+            element: <Reservations />,
           },
           {
             path: 'coupons',
@@ -106,18 +111,6 @@ const Router = createBrowserRouter([
                 <DynamicPageLoader pageKey="account/UserAccount" />
               </PrivateRoute>
             ),
-          },
-
-          // Admin routes
-          {
-            path: '/admin',
-            element: <DynamicPageLoader pageKey="admin/components/AdminLayout" />,
-            children: [
-              { path: '', element: <DynamicPageLoader pageKey="admin/Dashboard" /> },
-              { path: 'dishes', element: <DishesManagement /> },
-              { path: 'reviews', element: <ReviewsManagement /> },
-              { path: 'reservations', element: <AdminReservations /> },
-            ],
           },
 
           // Authentication routes
