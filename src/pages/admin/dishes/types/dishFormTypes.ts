@@ -1,22 +1,7 @@
 
 import * as yup from "yup";
 
-export interface DishFormData {
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  image_url: string;
-  is_available: boolean;
-}
-
-export interface DishFormProps {
-  initialData?: DishFormData & { id: string };
-  onSubmit: (dish: DishFormData) => Promise<void>;
-  onCancel?: () => void;
-}
-
-// Schéma de validation Yup corrigé
+// Schéma de validation Yup
 export const dishSchema = yup.object({
   name: yup.string().required("Le nom du plat est requis"),
   description: yup.string().required("La description est requise"),
@@ -24,4 +9,13 @@ export const dishSchema = yup.object({
   category: yup.string().required("La catégorie est requise"),
   image_url: yup.string().url("URL invalide").required("L'URL de l'image est requise"),
   is_available: yup.boolean().required(),
-}).required();
+});
+
+// Dériver le type directement du schéma Yup pour éviter les conflits
+export type DishFormData = yup.InferType<typeof dishSchema>;
+
+export interface DishFormProps {
+  initialData?: DishFormData & { id: string };
+  onSubmit: (dish: DishFormData) => Promise<void>;
+  onCancel?: () => void;
+}
