@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -70,9 +69,8 @@ const DishDetail = () => {
       id: dish.id,
       name: dish.name,
       price: dish.price,
-      image_url: dish.image_url,
-      quantity: 1
-    });
+      image_url: dish.image_url
+    }, 1);
 
     toast({
       title: "Ajouté au panier",
