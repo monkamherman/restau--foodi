@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
 export interface CartItem {
@@ -35,12 +35,12 @@ export const useCartPersistence = () => {
 
   // Sauvegarder le panier à chaque modification
   useEffect(() => {
-    if (cart.items.length > 0) {
+    if (cart.items.length > 0 || cart.total > 0) {
       saveCart(cart);
     }
   }, [cart]);
 
-  const loadCart = () => {
+  const loadCart = useCallback(() => {
     try {
       const savedCart = localStorage.getItem(CART_STORAGE_KEY);
       if (savedCart) {
@@ -50,15 +50,13 @@ export const useCartPersistence = () => {
         const cartAge = Date.now() - new Date(parsedCart.updatedAt).getTime();
         const maxAge = CART_EXPIRY_HOURS * 60 * 60 * 1000;
         
-        if (cartAge < maxAge) {
+        if (cartAge < maxAge && parsedCart.items.length > 0) {
           setCart(parsedCart);
-          if (parsedCart.items.length > 0) {
-            toast({
-              title: "Panier restauré",
-              description: `${parsedCart.items.length} article(s) retrouvé(s) dans votre panier.`
-            });
-          }
-        } else {
+          toast({
+            title: "Panier restauré",
+            description: `${parsedCart.items.length} article(s) retrouvé(s) dans votre panier.`
+          });
+        } else if (cartAge >= maxAge) {
           // Panier expiré, le supprimer
           localStorage.removeItem(CART_STORAGE_KEY);
         }
@@ -67,17 +65,21 @@ export const useCartPersistence = () => {
       console.error('Erreur lors du chargement du panier:', error);
       localStorage.removeItem(CART_STORAGE_KEY);
     }
-  };
+  }, [toast]);
 
-  const saveCart = (cartToSave: Cart) => {
+  const saveCart = useCallback((cartToSave: Cart) => {
     try {
-      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartToSave));
+      if (cartToSave.items.length === 0) {
+        localStorage.removeItem(CART_STORAGE_KEY);
+      } else {
+        localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartToSave));
+      }
     } catch (error) {
       console.error('Erreur lors de la sauvegarde du panier:', error);
     }
-  };
+  }, []);
 
-  const addToCart = (item: Omit<CartItem, 'quantity'>, quantity: number = 1) => {
+  const addToCart = useCallback((item: Omit<CartItem, 'quantity'>, quantity: number = 1) => {
     setCart(prevCart => {
       const existingItemIndex = prevCart.items.findIndex(cartItem => cartItem.id === item.id);
       let newItems: CartItem[];
@@ -107,9 +109,9 @@ export const useCartPersistence = () => {
       title: "Ajouté au panier",
       description: `${item.name} x${quantity}`
     });
-  };
+  }, [toast]);
 
-  const removeFromCart = (itemId: string) => {
+  const removeFromCart = useCallback((itemId: string) => {
     setCart(prevCart => {
       const newItems = prevCart.items.filter(item => item.id !== itemId);
       const newTotal = newItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -120,9 +122,9 @@ export const useCartPersistence = () => {
         updatedAt: new Date().toISOString()
       };
     });
-  };
+  }, []);
 
-  const updateQuantity = (itemId: string, quantity: number) => {
+  const updateQuantity = useCallback((itemId: string, quantity: number) => {
     if (quantity <= 0) {
       removeFromCart(itemId);
       return;
@@ -140,22 +142,22 @@ export const useCartPersistence = () => {
         updatedAt: new Date().toISOString()
       };
     });
-  };
+  }, [removeFromCart]);
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setCart({
       items: [],
       total: 0,
       updatedAt: new Date().toISOString()
     });
     localStorage.removeItem(CART_STORAGE_KEY);
-  };
+  }, []);
 
-  const getCartSummary = () => ({
+  const getCartSummary = useCallback(() => ({
     itemCount: cart.items.reduce((sum, item) => sum + item.quantity, 0),
     total: cart.total,
     isEmpty: cart.items.length === 0
-  });
+  }), [cart.items, cart.total]);
 
   return {
     cart,
