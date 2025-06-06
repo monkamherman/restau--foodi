@@ -14,7 +14,7 @@ interface LoyaltyPoints {
 interface LoyaltyTransaction {
   id: string;
   points: number;
-  transaction_type: 'earned' | 'spent' | 'expired';
+  transaction_type: string;
   description: string | null;
   created_at: string;
 }
@@ -24,7 +24,7 @@ interface LoyaltyReward {
   name: string;
   description: string | null;
   points_required: number;
-  reward_type: 'discount_percentage' | 'discount_amount' | 'free_item';
+  reward_type: string;
   reward_value: number | null;
   is_active: boolean;
 }
