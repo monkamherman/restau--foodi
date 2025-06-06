@@ -1,8 +1,9 @@
 
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, User } from "lucide-react";
 import { Link } from "react-router-dom";
-import PersistentCartIndicator from '@/components/custom/cart/PersistentCartIndicator';
+import { Button } from "@/components/ui/button";
+import CartIndicator from '@/components/custom/cart/CartIndicator';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -36,9 +37,28 @@ const Header = () => {
             </Link>
           </nav>
 
-          {/* Cart and Mobile Menu */}
+          {/* Action Buttons */}
           <div className="flex items-center space-x-4">
-            <PersistentCartIndicator />
+            {/* Cart Indicator */}
+            <CartIndicator />
+            
+            {/* User Account Button */}
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/account" className="flex items-center space-x-2">
+                <User className="w-4 h-4" />
+                <span className="hidden sm:inline">Compte</span>
+              </Link>
+            </Button>
+
+            {/* Login/Register Buttons */}
+            <div className="hidden md:flex items-center space-x-2">
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/login">Connexion</Link>
+              </Button>
+              <Button size="sm" asChild>
+                <Link to="/register">S'inscrire</Link>
+              </Button>
+            </div>
             
             {/* Mobile menu button */}
             <button
@@ -96,6 +116,22 @@ const Header = () => {
               >
                 Mon Compte
               </Link>
+              <div className="flex flex-col space-y-2 pt-4 border-t">
+                <Link 
+                  to="/login"
+                  className="text-foodie-text hover:text-foodie-primary transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Connexion
+                </Link>
+                <Link 
+                  to="/register"
+                  className="text-foodie-text hover:text-foodie-primary transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  S'inscrire
+                </Link>
+              </div>
             </div>
           </nav>
         )}
