@@ -1,175 +1,104 @@
 
 import { useState } from "react";
-import { Menu, X, Search, ShoppingCart, User } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Link, useLocation } from "react-router-dom";
-import { useAuth } from "@/hooks/auth";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Menu, X } from "lucide-react";
+import { Link } from "react-router-dom";
+import PersistentCartIndicator from '@/components/custom/cart/PersistentCartIndicator';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const location = useLocation();
-  const { user, signOut } = useAuth();
-  
-  // Sample cart count (in a real app, this would come from context/state)
-  const cartItemCount = 3;
-
-  const menuItems = [
-    { name: "Home", path: "/" },
-    { name: "Menu", path: "/menu" },
-    { name: "Gallery", path: "/gallery" },
-    { name: "Delivery", path: "/delivery" },
-    { name: "Réservations", path: "/reservations" },
-    { name: "About Us", path: "/about-us" },
-    { name: "Blog", path: "/blog" }
-  ];
 
   return (
-    <header className="bg-white py-4 shadow-sm sticky top-0 w-full z-50">
-      <div className="container-custom flex items-center justify-between">
-        <Link to="/" className="flex items-center z-10">
-          <div className="bg-foodie-primary text-white font-bold px-2 py-1 rounded text-xl">MENU</div>
-        </Link>
-
-        {/* Desktop Navigation */}
-        <nav className="hidden md:block">
-          <ul className="flex space-x-8">
-            {menuItems.map((item) => (
-              <li key={item.name}>
-                <Link 
-                  to={item.path}
-                  className={cn(
-                    "font-medium transition-colors",
-                    location.pathname === item.path 
-                      ? "text-foodie-primary" 
-                      : "text-foodie-text hover:text-foodie-primary"
-                  )}
-                >
-                  {item.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-        {/* Action buttons */}
-        <div className="flex items-center space-x-4">
-          <button className="text-foodie-text hover:text-foodie-primary transition-colors">
-            <Search size={20} />
-          </button>
-          
-          {user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="text-foodie-text hover:text-foodie-primary transition-colors">
-                  <User size={20} />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link to="/profile">Profil</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/profile/settings">Paramètres</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/account">Commandes</Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => signOut()}>
-                  Se déconnecter
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <Link to="/login" className="text-foodie-text hover:text-foodie-primary transition-colors">
-              <User size={20} />
-            </Link>
-          )}
-          
-          <Link 
-            to="/cart" 
-            className="text-foodie-text hover:text-foodie-primary transition-colors md:border-l md:pl-4 md:border-gray-200 relative"
-          >
-            <ShoppingCart size={20} />
-            {cartItemCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-foodie-primary text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                {cartItemCount}
-              </span>
-            )}
+    <header className="bg-white shadow-sm fixed top-0 left-0 right-0 z-50">
+      <div className="container-custom">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <Link to="/" className="flex items-center space-x-2">
+            <img src="/logo.png" alt="Foodie" className="h-8 w-8" />
+            <span className="text-xl font-bold text-foodie-primary">Foodie</span>
           </Link>
-          
-          {!user ? (
-            <Link to="/login" className="hidden md:block btn-primary py-2">
-              Connexion
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-8">
+            <Link to="/" className="text-foodie-text hover:text-foodie-primary transition-colors">
+              Accueil
             </Link>
-          ) : (
-            <Link to="/menu" className="hidden md:block btn-primary py-2">
-              Commander
+            <Link to="/menu" className="text-foodie-text hover:text-foodie-primary transition-colors">
+              Menu
             </Link>
-          )}
-          
-          {/* Mobile Menu Button */}
-          <button 
-            onClick={() => setIsMenuOpen(!isMenuOpen)} 
-            className="md:hidden text-foodie-text"
-          >
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+            <Link to="/about" className="text-foodie-text hover:text-foodie-primary transition-colors">
+              À propos
+            </Link>
+            <Link to="/reservations" className="text-foodie-text hover:text-foodie-primary transition-colors">
+              Réservations
+            </Link>
+            <Link to="/contact" className="text-foodie-text hover:text-foodie-primary transition-colors">
+              Contact
+            </Link>
+          </nav>
+
+          {/* Cart and Mobile Menu */}
+          <div className="flex items-center space-x-4">
+            <PersistentCartIndicator />
+            
+            {/* Mobile menu button */}
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="md:hidden p-2 rounded-md text-foodie-text hover:text-foodie-primary"
+            >
+              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </div>
 
         {/* Mobile Navigation */}
-        <div className={cn(
-          "fixed inset-0 bg-white flex items-center justify-center transition-all duration-300 md:hidden pt-16",
-          isMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        )}>
-          <ul className="flex flex-col items-center space-y-6">
-            {menuItems.map((item) => (
-              <li key={item.name}>
-                <Link 
-                  to={item.path}
-                  className={cn(
-                    "font-medium text-xl",
-                    location.pathname === item.path
-                      ? "text-foodie-primary" 
-                      : "text-foodie-text hover:text-foodie-primary"
-                  )}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              </li>
-            ))}
-            <li>
-              <Link to="/cart" className="flex items-center text-xl" onClick={() => setIsMenuOpen(false)}>
-                <ShoppingCart className="mr-2" />
-                Cart {cartItemCount > 0 && <span className="ml-2 bg-foodie-primary text-white text-xs px-2 py-1 rounded-full">{cartItemCount}</span>}
+        {isMenuOpen && (
+          <nav className="md:hidden py-4 border-t">
+            <div className="flex flex-col space-y-4">
+              <Link 
+                to="/" 
+                className="text-foodie-text hover:text-foodie-primary transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Accueil
               </Link>
-            </li>
-            <li>
-              {user ? (
-                <Link to="/profile" className="flex items-center text-xl" onClick={() => setIsMenuOpen(false)}>
-                  <User className="mr-2" />
-                  Mon profil
-                </Link>
-              ) : (
-                <Link to="/login" className="btn-primary mt-4" onClick={() => setIsMenuOpen(false)}>
-                  Connexion
-                </Link>
-              )}
-            </li>
-          </ul>
-        </div>
+              <Link 
+                to="/menu" 
+                className="text-foodie-text hover:text-foodie-primary transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Menu
+              </Link>
+              <Link 
+                to="/about" 
+                className="text-foodie-text hover:text-foodie-primary transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                À propos
+              </Link>
+              <Link 
+                to="/reservations" 
+                className="text-foodie-text hover:text-foodie-primary transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Réservations
+              </Link>
+              <Link 
+                to="/contact" 
+                className="text-foodie-text hover:text-foodie-primary transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Contact
+              </Link>
+              <Link 
+                to="/account" 
+                className="text-foodie-text hover:text-foodie-primary transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Mon Compte
+              </Link>
+            </div>
+          </nav>
+        )}
       </div>
     </header>
   );

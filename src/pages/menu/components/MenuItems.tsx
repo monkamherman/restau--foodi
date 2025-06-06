@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Heart, ShoppingCart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useFavorites } from "@/hooks/useFavorites";
+import { useCartPersistence } from "@/hooks/useCartPersistence";
 
 interface MenuItem {
   id: string;
@@ -31,13 +33,13 @@ const MenuItems = () => {
   const [activeCategory, setActiveCategory] = useState("all");
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const { toast } = useToast();
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const { addToCart } = useCartPersistence();
 
   useEffect(() => {
     fetchMenuItems();
     
-    // Configuration des mises à jour en temps réel
     const channel = supabase
       .channel('menu-changes')
       .on(
@@ -95,32 +97,27 @@ const MenuItems = () => {
   const createSlug = (item: MenuItem) => {
     const name = item.name.toLowerCase().replace(/\s+/g, '-');
     const category = item.category.toLowerCase();
-    const origin = 'restaurant'; // Origine par défaut
+    const origin = 'restaurant';
     return `${name}-${category}-${origin}`;
   };
 
-  const toggleFavorite = (itemId: string) => {
-    const newFavorites = new Set(favorites);
-    if (newFavorites.has(itemId)) {
-      newFavorites.delete(itemId);
-      toast({
-        title: "Retiré des favoris",
-        description: "Le plat a été retiré de vos favoris."
-      });
-    } else {
-      newFavorites.add(itemId);
-      toast({
-        title: "Ajouté aux favoris",
-        description: "Le plat a été ajouté à vos favoris."
-      });
-    }
-    setFavorites(newFavorites);
+  const handleToggleFavorite = (item: MenuItem) => {
+    toggleFavorite({
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      image_url: item.image_url,
+      category: item.category
+    });
   };
 
-  const addToCart = (item: MenuItem) => {
-    toast({
-      title: "Ajouté au panier",
-      description: `${item.name} a été ajouté à votre panier.`
+  const handleAddToCart = (item: MenuItem) => {
+    addToCart({
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      image_url: item.image_url,
+      category: item.category
     });
   };
 
@@ -177,13 +174,13 @@ const MenuItems = () => {
                   className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                 />
                 <button
-                  onClick={() => toggleFavorite(item.id)}
+                  onClick={() => handleToggleFavorite(item)}
                   className={cn(
                     "absolute top-2 right-2 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center transition-colors",
-                    favorites.has(item.id) ? "text-red-500" : "text-gray-400 hover:text-red-500"
+                    isFavorite(item.id) ? "text-red-500" : "text-gray-400 hover:text-red-500"
                   )}
                 >
-                  <Heart size={16} className={favorites.has(item.id) ? "fill-current" : ""} />
+                  <Heart size={16} className={isFavorite(item.id) ? "fill-current" : ""} />
                 </button>
               </div>
               <div className="p-6">
@@ -209,7 +206,7 @@ const MenuItems = () => {
                   <Button 
                     size="sm" 
                     className="px-3"
-                    onClick={() => addToCart(item)}
+                    onClick={() => handleAddToCart(item)}
                   >
                     <ShoppingCart size={16} />
                   </Button>
