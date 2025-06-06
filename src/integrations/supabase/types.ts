@@ -93,6 +93,110 @@ export type Database = {
         }
         Relationships: []
       }
+      loyalty_points: {
+        Row: {
+          created_at: string
+          id: string
+          points: number
+          total_earned: number
+          total_spent: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          points?: number
+          total_earned?: number
+          total_spent?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          points?: number
+          total_earned?: number
+          total_spent?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      loyalty_rewards: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          points_required: number
+          reward_type: string
+          reward_value: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          points_required: number
+          reward_type: string
+          reward_value?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          points_required?: number
+          reward_type?: string
+          reward_value?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      loyalty_transactions: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          order_id: string | null
+          points: number
+          transaction_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          points: number
+          transaction_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          points?: number
+          transaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loyalty_transactions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           created_at: string
@@ -293,31 +397,75 @@ export type Database = {
         }
         Relationships: []
       }
+      review_votes: {
+        Row: {
+          created_at: string
+          id: string
+          is_helpful: boolean
+          review_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_helpful: boolean
+          review_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_helpful?: boolean
+          review_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_votes_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reviews: {
         Row: {
+          admin_response: string | null
           comment: string | null
           created_at: string
           dish_id: string | null
+          helpful_count: number | null
           id: string
+          is_approved: boolean | null
           rating: number
+          total_votes: number | null
           updated_at: string
           user_id: string | null
         }
         Insert: {
+          admin_response?: string | null
           comment?: string | null
           created_at?: string
           dish_id?: string | null
+          helpful_count?: number | null
           id?: string
+          is_approved?: boolean | null
           rating: number
+          total_votes?: number | null
           updated_at?: string
           user_id?: string | null
         }
         Update: {
+          admin_response?: string | null
           comment?: string | null
           created_at?: string
           dish_id?: string | null
+          helpful_count?: number | null
           id?: string
+          is_approved?: boolean | null
           rating?: number
+          total_votes?: number | null
           updated_at?: string
           user_id?: string | null
         }
@@ -327,6 +475,44 @@ export type Database = {
             columns: ["dish_id"]
             isOneToOne: false
             referencedRelation: "dishes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_rewards: {
+        Row: {
+          claimed_at: string
+          expires_at: string | null
+          id: string
+          is_used: boolean | null
+          reward_id: string
+          used_at: string | null
+          user_id: string
+        }
+        Insert: {
+          claimed_at?: string
+          expires_at?: string | null
+          id?: string
+          is_used?: boolean | null
+          reward_id: string
+          used_at?: string | null
+          user_id: string
+        }
+        Update: {
+          claimed_at?: string
+          expires_at?: string | null
+          id?: string
+          is_used?: boolean | null
+          reward_id?: string
+          used_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_rewards_reward_id_fkey"
+            columns: ["reward_id"]
+            isOneToOne: false
+            referencedRelation: "loyalty_rewards"
             referencedColumns: ["id"]
           },
         ]

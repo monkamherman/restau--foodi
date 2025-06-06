@@ -1,226 +1,195 @@
 
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Heart, Minus, Plus, Star, Clock, ShoppingCart } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import ReviewsList from "@/components/ReviewsList";
-import ReviewForm from "@/components/ReviewForm";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, Star, ShoppingCart, Heart } from "lucide-react";
+import { useCartPersistence } from "@/hooks/useCartPersistence";
+import { useFavorites } from "@/hooks/useFavorites";
+import EnhancedReviewForm from "@/components/custom/reviews/EnhancedReviewForm";
+import EnhancedReviewsList from "@/components/custom/reviews/EnhancedReviewsList";
 
 interface Dish {
   id: string;
   name: string;
   description: string;
   price: number;
-  category: string;
   image_url: string;
+  category: string;
   is_available: boolean;
   is_featured: boolean;
-  created_at: string;
-  updated_at: string;
 }
 
 const DishDetail = () => {
-  const { slug } = useParams();
-  const [quantity, setQuantity] = useState(1);
-  const [activeTab, setActiveTab] = useState("description");
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [dish, setDish] = useState<Dish | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshReviews, setRefreshReviews] = useState(0);
-  const [isFavorite, setIsFavorite] = useState(false);
-  const { toast } = useToast();
-  
+  const { addToCart } = useCartPersistence();
+  const { toggleFavorite, isFavorite } = useFavorites();
+
   useEffect(() => {
-    if (slug) {
-      fetchDishBySlug(slug);
+    if (id) {
+      fetchDish();
     }
-  }, [slug]);
-  
-  const fetchDishBySlug = async (dishSlug: string) => {
+  }, [id]);
+
+  const fetchDish = async () => {
+    if (!id) return;
+
     try {
       setIsLoading(true);
-      
-      // Décoder le slug: nom-category-origin devient recherche par nom
-      const dishName = dishSlug.split('-')[0].replace(/%20/g, ' ');
-      
       const { data, error } = await supabase
         .from('dishes')
         .select('*')
-        .ilike('name', `%${dishName}%`)
+        .eq('id', id)
         .single();
-      
+
       if (error) throw error;
-      
       setDish(data);
     } catch (error: any) {
+      console.error('Error fetching dish:', error);
       toast({
         variant: "destructive",
-        title: "Erreur lors du chargement du plat",
-        description: error.message
+        title: "Erreur",
+        description: "Impossible de charger les détails du plat"
       });
     } finally {
       setIsLoading(false);
     }
   };
-  
-  const updateQuantity = (change: number) => {
-    setQuantity(Math.max(1, quantity + change));
-  };
-  
-  const addToCart = () => {
+
+  const handleAddToCart = () => {
     if (!dish) return;
-    console.log(`Added ${quantity} of ${dish.name} to cart`);
+
+    addToCart({
+      id: dish.id,
+      name: dish.name,
+      price: dish.price,
+      image_url: dish.image_url,
+      quantity: 1
+    });
+
     toast({
       title: "Ajouté au panier",
-      description: `${quantity} × ${dish.name} ajouté à votre panier`
+      description: `${dish.name} a été ajouté à votre panier`
     });
   };
 
-  const toggleFavorite = () => {
-    setIsFavorite(!isFavorite);
-    toast({
-      title: isFavorite ? "Retiré des favoris" : "Ajouté aux favoris",
-      description: isFavorite ? `${dish?.name} retiré de vos favoris` : `${dish?.name} ajouté à vos favoris`
-    });
+  const handleToggleFavorite = () => {
+    if (!dish) return;
+    toggleFavorite(dish);
   };
 
   const handleReviewSuccess = () => {
     setRefreshReviews(prev => prev + 1);
   };
 
-  const tabItems = [
-    { id: "description", label: "Description" },
-    { id: "reviews", label: "Avis" }
-  ];
-
   if (isLoading) {
     return (
-      <div className="pt-32 pb-16 flex justify-center">
-        <div className="animate-spin h-10 w-10 border-4 border-foodie-primary border-t-transparent rounded-full"></div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin h-10 w-10 border-4 border-primary border-t-transparent rounded-full"></div>
       </div>
     );
   }
-  
+
   if (!dish) {
     return (
-      <div className="pt-32 pb-16 text-center">
-        <h2 className="text-2xl font-bold mb-4">Plat introuvable</h2>
-        <p className="text-foodie-text-light">Le plat que vous recherchez n'existe pas.</p>
+      <div className="container mx-auto px-4 py-8">
+        <p className="text-center text-muted-foreground">Plat non trouvé</p>
       </div>
     );
   }
-  
+
   return (
-    <div className="pt-32 pb-16">
-      <div className="container-custom">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-          {/* Image section */}
-          <div className="rounded-lg overflow-hidden">
-            <img 
-              src={dish.image_url || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80"} 
-              alt={dish.name} 
-              className="w-full h-[400px] object-cover"
-            />
-          </div>
-          
-          {/* Details section */}
+    <div className="container mx-auto px-4 py-8">
+      <Button
+        variant="ghost"
+        onClick={() => navigate(-1)}
+        className="mb-6 flex items-center gap-2"
+      >
+        <ArrowLeft size={20} />
+        Retour
+      </Button>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        <div>
+          <img
+            src={dish.image_url || '/placeholder.svg'}
+            alt={dish.name}
+            className="w-full h-96 object-cover rounded-lg"
+          />
+        </div>
+
+        <div className="space-y-6">
           <div>
-            <div className="flex justify-between items-start mb-2">
-              <span className="bg-foodie-primary/10 text-foodie-primary text-sm px-3 py-1 rounded-full">
-                {dish.category}
-              </span>
-              <button 
-                onClick={toggleFavorite}
-                className={cn(
-                  "w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center transition-colors",
-                  isFavorite ? "text-red-500" : "hover:text-foodie-primary"
-                )}
-              >
-                <Heart size={20} className={isFavorite ? "fill-current" : ""} />
-              </button>
-            </div>
-            
-            <h1 className="text-3xl font-bold mb-3">{dish.name}</h1>
-            
-            <div className="flex items-center mb-6">
-              <span className="text-2xl font-bold text-foodie-primary">
-                {new Intl.NumberFormat('fr-FR', {
-                  style: 'currency',
-                  currency: 'EUR',
-                }).format(dish.price)}
-              </span>
+            <div className="flex items-center gap-2 mb-2">
+              <h1 className="text-3xl font-bold">{dish.name}</h1>
               {dish.is_featured && (
-                <span className="ml-4 bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">
-                  Coup de cœur
-                </span>
+                <Badge className="bg-yellow-500">
+                  <Star className="w-3 h-3 mr-1" />
+                  Vedette
+                </Badge>
               )}
             </div>
             
-            {dish.description && (
-              <p className="text-foodie-text-light mb-6">{dish.description}</p>
-            )}
+            <Badge variant="outline" className="mb-4">
+              {dish.category}
+            </Badge>
             
-            <div className="flex items-center space-x-4 mb-8">
-              <div className="flex items-center border border-gray-300 rounded-lg">
-                <button 
-                  onClick={() => updateQuantity(-1)} 
-                  className="w-10 h-10 flex items-center justify-center hover:text-foodie-primary border-r"
-                >
-                  <Minus size={16} />
-                </button>
-                <span className="w-12 text-center font-medium">{quantity}</span>
-                <button 
-                  onClick={() => updateQuantity(1)} 
-                  className="w-10 h-10 flex items-center justify-center hover:text-foodie-primary border-l"
-                >
-                  <Plus size={16} />
-                </button>
-              </div>
-              
-              <button 
-                onClick={addToCart} 
-                className="flex-grow bg-foodie-primary text-white py-3 rounded-lg font-medium flex items-center justify-center hover:bg-foodie-primary-dark transition-all"
-                disabled={!dish.is_available}
-              >
-                <ShoppingCart size={18} className="mr-2" />
-                {dish.is_available ? "Ajouter au panier" : "Non disponible"}
-              </button>
-            </div>
+            <p className="text-gray-600 text-lg mb-4">
+              {dish.description}
+            </p>
             
-            {/* Tabs */}
-            <div className="border-b">
-              <div className="flex">
-                {tabItems.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={cn(
-                      "py-3 px-6 font-medium",
-                      activeTab === tab.id 
-                        ? "text-foodie-primary border-b-2 border-foodie-primary" 
-                        : "text-foodie-text-light hover:text-foodie-text"
-                    )}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            
-            <div className="py-6">
-              {activeTab === "description" && (
-                <p className="text-foodie-text-light">{dish.description || "Aucune description disponible pour ce plat."}</p>
-              )}
-              
-              {activeTab === "reviews" && (
-                <div className="space-y-8">
-                  <ReviewsList dishId={dish.id} refreshTrigger={refreshReviews} />
-                  <ReviewForm dishId={dish.id} onSuccess={handleReviewSuccess} />
-                </div>
-              )}
-            </div>
+            <p className="text-3xl font-bold text-primary mb-6">
+              {dish.price.toFixed(2)}€
+            </p>
           </div>
+
+          <div className="flex gap-4">
+            <Button
+              onClick={handleAddToCart}
+              disabled={!dish.is_available}
+              className="flex-1 flex items-center gap-2"
+            >
+              <ShoppingCart size={20} />
+              {dish.is_available ? 'Ajouter au panier' : 'Non disponible'}
+            </Button>
+            
+            <Button
+              variant="outline"
+              onClick={handleToggleFavorite}
+              className="flex items-center gap-2"
+            >
+              <Heart 
+                size={20} 
+                className={isFavorite(dish.id) ? 'fill-red-500 text-red-500' : ''} 
+              />
+              {isFavorite(dish.id) ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+            </Button>
+          </div>
+
+          {!dish.is_available && (
+            <p className="text-red-600 font-medium">
+              Ce plat n'est actuellement pas disponible
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Section des avis */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div>
+          <h2 className="text-2xl font-bold mb-6">Laisser un avis</h2>
+          <EnhancedReviewForm dishId={dish.id} onSuccess={handleReviewSuccess} />
+        </div>
+        
+        <div>
+          <EnhancedReviewsList dishId={dish.id} refreshTrigger={refreshReviews} />
         </div>
       </div>
     </div>
