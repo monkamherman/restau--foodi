@@ -1,7 +1,10 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User, Heart, ShoppingBag, Settings, Bell, MessageSquare } from "lucide-react";
+import { useAuth } from "@/hooks/auth";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import ProfileTab from "./components/ProfileTab";
 import FavoritesTab from "./components/FavoritesTab";
 import OrdersTab from "./components/OrdersTab";
@@ -9,8 +12,61 @@ import ReviewsTab from "./components/ReviewsTab";
 import SettingsTab from "./components/SettingsTab";
 import NotificationsTab from "./components/NotificationsTab";
 
+type ProfileData = {
+  first_name: string;
+  last_name: string;
+};
+
 const UserAccount = () => {
   const [activeTab, setActiveTab] = useState("profile");
+  const [profile, setProfile] = useState<ProfileData>({
+    first_name: "",
+    last_name: ""
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (user) {
+      fetchProfile();
+    }
+  }, [user]);
+
+  const fetchProfile = async () => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('first_name, last_name')
+        .eq('id', user?.id)
+        .single();
+      
+      if (error) throw error;
+      
+      setProfile({
+        first_name: data?.first_name || "",
+        last_name: data?.last_name || ""
+      });
+    } catch (error: any) {
+      console.error('Error fetching profile:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur lors du chargement du profil",
+        description: error.message
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin h-10 w-10 border-4 border-primary border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="pt-20">
@@ -53,7 +109,7 @@ const UserAccount = () => {
             
             <div className="mt-8">
               <TabsContent value="profile">
-                <ProfileTab />
+                <ProfileTab profile={profile} />
               </TabsContent>
               
               <TabsContent value="favorites">
