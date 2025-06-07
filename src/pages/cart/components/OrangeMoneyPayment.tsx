@@ -58,8 +58,8 @@ const OrangeMoneyPayment = ({ amount, onClose, onSuccess }: OrangeMoneyPaymentPr
         </button>
         
         <div className="flex items-center mb-6">
-          <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white mr-3">
-            🟠
+          <div className="w-8 h-8 rounded-full flex items-center justify-center text-white mr-3">
+            <img src="/orang.png" alt="orange money" />
           </div>
           <h2 className="text-2xl font-bold">Orange Money</h2>
         </div>

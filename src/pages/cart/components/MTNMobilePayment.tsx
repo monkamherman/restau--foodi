@@ -62,8 +62,8 @@ const MTNMobilePayment = ({ amount, onClose, onSuccess }: MTNMobilePaymentProps)
         </button>
         
         <div className="flex items-center mb-6">
-          <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center text-white mr-3">
-            🟡
+          <div className="w-8 h-8 rounded-full flex items-center justify-center text-white mr-3">
+            <img src="/mtn.png" alt="mtn mobile money" />
           </div>
           <h2 className="text-2xl font-bold">MTN Mobile Money</h2>
         </div>

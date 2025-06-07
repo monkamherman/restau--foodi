@@ -28,7 +28,6 @@ const MobilePayment = ({ amount, onClose, onSuccess }: MobilePaymentProps) => {
       setStep(2);
     }, 1500);
   };
-
   const handleVerifyCode = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);

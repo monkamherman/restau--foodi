@@ -53,11 +53,11 @@ const Footer = () => {
             <ul className="space-y-4">
               <li className="flex items-start">
                 <MapPin size={20} className="text-foodie-primary mr-3 mt-1 flex-shrink-0" />
-                <span className="text-foodie-text-light">123 Food Street, Culinary City, FC 12345</span>
+                <span className="text-foodie-text-light">237 Food Street, Yaounde-melen</span>
               </li>
               <li className="flex items-center">
                 <Phone size={20} className="text-foodie-primary mr-3 flex-shrink-0" />
-                <a href="tel:+1234567890" className="text-foodie-text-light hover:text-foodie-primary">+1 (234) 567-890</a>
+                <a href="tel:+1234567890" className="text-foodie-text-light hover:text-foodie-primary">+237658852731</a>
               </li>
               <li className="flex items-center">
                 <Mail size={20} className="text-foodie-primary mr-3 flex-shrink-0" />
@@ -69,7 +69,7 @@ const Footer = () => {
         
         <div className="border-t border-gray-100 mt-10 pt-6 flex flex-col md:flex-row justify-between items-center">
           <p className="text-foodie-text-light text-sm mb-4 md:mb-0">
-            © {currentYear} Foodie Restaurant. All rights reserved.
+            © {currentYear} RAGE tech. All rights reserved.
           </p>
           <div className="flex space-x-6">
             <a href="#" className="text-foodie-text-light hover:text-foodie-primary text-sm">Privacy Policy</a>

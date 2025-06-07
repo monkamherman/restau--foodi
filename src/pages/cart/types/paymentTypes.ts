@@ -22,7 +22,7 @@ export const PAYMENT_PROVIDERS: Record<PaymentMethod, PaymentProviderConfig> = {
   'orange-money': {
     name: 'Orange Money',
     icon: '🟠',
-    color: 'bg-orange-500',
+    color: '',
     description: 'Paiement via Orange Money Cameroun'
   },
   'mtn-mobile': {
